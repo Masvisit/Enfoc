@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#141d27">
+<title>Enfoc — pomodoro i registre d'estudi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#141d27;
+  --surface:#1d2a37;
+  --surface-2:#25333f;
+  --line:#33434f;
+  --text:#f1ece2;
+  --muted:#9aabb8;
+  --focus:#e8b33c;
+  --break:#6fc3a6;
+  --extra:#ef8a5a;
+  --danger:#e8695a;
+  --r:14px;
+  --accent:var(--focus);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ink);
+  color:var(--text);
+  font-family:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:env(safe-area-inset-bottom);
+  transition:background .6s ease;
+}
+body[data-phase="break"],body[data-phase="breakOver"]{background:#122622}
+body[data-phase="focusOver"]{background:#1e1a21}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,select{font:inherit}
+.wrap{max-width:560px;margin:0 auto;padding:0 18px}
+
+/* ---------- capçalera ---------- */
+header{
+  position:sticky;top:0;z-index:20;
+  background:rgba(20,29,39,.86);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.hbar{display:flex;align-items:center;gap:14px;height:56px}
+.brand{font-weight:700;letter-spacing:-.02em;font-size:19px}
+.brand span{color:var(--accent)}
+nav{display:flex;gap:2px;margin-left:auto;background:var(--surface);border-radius:10px;padding:3px}
+nav button{padding:7px 13px;border-radius:8px;font-size:14px;font-weight:500;color:var(--muted)}
+nav button[aria-current="true"]{background:var(--surface-2);color:var(--text)}
+.icon-btn{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--surface);color:var(--muted)}
+.icon-btn:hover{color:var(--text)}
+:where(button,input,select,[tabindex]):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- rellotge ---------- */
+.stage{padding:22px 0 34px;text-align:center}
+.phase{
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:14px;font-weight:600;color:var(--accent);
+  border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);
+  background:color-mix(in srgb,var(--accent) 10%,transparent);
+  padding:6px 14px;border-radius:999px;
+}
+.phase i{width:7px;height:7px;border-radius:50%;background:var(--accent);display:block}
+.ring{position:relative;width:min(78vw,290px);margin:22px auto 0;aspect-ratio:1}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:9;stroke-linecap:round}
+.track{stroke:var(--surface)}
+.prog{stroke:var(--accent);transition:stroke-dashoffset .35s linear,stroke .5s ease}
+.ring .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#clock{
+  font-size:clamp(46px,15vw,62px);font-weight:600;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums;line-height:1;
+}
+#clockNote{font-size:13px;color:var(--muted);min-height:20px}
+.paused #clock{opacity:.45}
+.dots{display:flex;gap:7px;justify-content:center;margin-top:18px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--surface-2);display:block}
+.dots i.on{background:var(--focus)}
+.dots i.long{width:20px;border-radius:5px}
+
+/* ---------- comptadors ---------- */
+.tally{display:flex;gap:10px;margin-top:24px}
+.tally div{flex:1;background:var(--surface);border-radius:var(--r);padding:11px 8px}
+.tally b{display:block;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+.tally small{color:var(--muted);font-size:12px}
+.tally .u b{color:var(--focus)}
+.tally .d b{color:var(--break)}
+
+/* ---------- controls ---------- */
+.tema{margin-top:18px;display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:var(--r);padding:0 14px}
+.tema label{color:var(--muted);font-size:14px;white-space:nowrap}
+.tema input{flex:1;background:none;border:0;color:var(--text);padding:13px 0;min-width:0}
+.tema input::placeholder{color:#6d7f8c}
+.controls{display:flex;gap:10px;margin-top:14px}
+.btn{
+  border-radius:var(--r);padding:15px 18px;font-weight:600;font-size:16px;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  background:var(--surface);transition:transform .08s ease,background .2s ease;
+}
+.btn:active{transform:scale(.98)}
+.btn.primary{flex:1;background:var(--accent);color:#12181f}
+.btn.ghost{background:var(--surface-2);color:var(--text)}
+.btn.wide{width:100%}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.btn.stop{width:58px;color:var(--danger)}
+.next{
+  margin-top:14px;padding:16px;border-radius:var(--r);
+  background:color-mix(in srgb,var(--accent) 14%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);
+}
+.next p{margin:0 0 12px;font-size:14px;color:var(--text)}
+.next p b{color:var(--accent);font-variant-numeric:tabular-nums}
+.hidden{display:none !important}
+
+/* ---------- registre ---------- */
+.seg{display:flex;background:var(--surface);border-radius:10px;padding:3px;margin:18px 0 16px}
+.seg button{flex:1;padding:9px;border-radius:8px;font-size:14px;font-weight:500;color:var(--muted)}
+.seg button[aria-current="true"]{background:var(--surface-2);color:var(--text)}
+.daygroup{margin-bottom:22px}
+.dayhead{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.dayhead h3{margin:0;font-size:15px;font-weight:600;text-transform:none}
+.dayhead span{font-size:14px;color:var(--focus);font-variant-numeric:tabular-nums}
+.rec{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
+.rec .hour{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;width:82px;flex:none}
+.rec .mid{flex:1;min-width:0}
+.rec .mid b{display:block;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.rec .mid small{color:var(--muted);font-size:12.5px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rec .del{color:#7b8b98;padding:4px}
+.pill{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--muted);flex:none}
+.empty{text-align:center;color:var(--muted);padding:48px 20px;font-size:15px}
+
+.calnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.calnav h3{margin:0;font-size:17px;font-weight:600}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal .dow{text-align:center;font-size:11.5px;color:var(--muted);padding-bottom:4px}
+.cal button{
+  aspect-ratio:1;border-radius:10px;background:var(--surface);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font-size:14px;font-variant-numeric:tabular-nums;
+}
+.cal button.out{opacity:.25}
+.cal button.today{box-shadow:inset 0 0 0 1.5px var(--muted)}
+.cal button[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--focus)}
+.cal button em{font-style:normal;font-size:10.5px;color:var(--focus);font-weight:600}
+.cal button .lvl{width:60%;height:3px;border-radius:2px;background:var(--focus)}
+.cal button.goal{background:color-mix(in srgb,var(--focus) 22%,var(--surface))}
+.cal button.goal em{color:#f7d894}
+.cal button.goal .tick{width:5px;height:5px;border-radius:50%;background:var(--focus)}
+.callegend{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12.5px;color:var(--muted)}
+.callegend i{width:14px;height:14px;border-radius:5px;background:color-mix(in srgb,var(--focus) 22%,var(--surface));display:block;flex:none}
+.rec .mid .note{white-space:normal;color:#8ea0ad;margin-top:3px;font-size:12.5px;line-height:1.4}
+.field textarea{
+  width:100%;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:10px;padding:12px;color:var(--text);resize:vertical;min-height:74px;font:inherit;
+}
+.field textarea::placeholder{color:#6d7f8c}
+.calfoot{margin-top:20px}
+.summary{display:flex;gap:10px;margin-bottom:18px}
+.summary div{flex:1;background:var(--surface);border-radius:var(--r);padding:12px}
+.summary b{display:block;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+.summary small{color:var(--muted);font-size:12px}
+.tools{display:flex;gap:10px;margin:8px 0 34px}
+.tools .btn{flex:1;font-size:14px;padding:13px}
+.sync{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:10px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:block;flex:none}
+.sync.ok i{background:var(--break)}
+.sync.bad i{background:var(--danger)}
+
+/* ---------- diàlegs ---------- */
+dialog{
+  border:0;padding:0;background:var(--surface);color:var(--text);
+  border-radius:18px;width:min(440px,calc(100vw - 32px));
+}
+dialog::backdrop{background:rgba(10,14,19,.7)}
+.sheet{padding:22px}
+.sheet h2{margin:0 0 4px;font-size:20px;font-weight:600}
+.sheet p.sub{margin:0 0 18px;color:var(--muted);font-size:14px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.field input[type=text],.field input[type=url],.field input[type=password]{
+  width:100%;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:10px;padding:12px;color:var(--text);
+}
+.field.row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.recap{background:var(--surface-2);border-radius:var(--r);padding:14px;margin-bottom:18px}
+.recap div{display:flex;justify-content:space-between;padding:5px 0;font-size:15px}
+.recap div span{color:var(--muted)}
+.recap div b{font-variant-numeric:tabular-nums}
+.sheet .controls{margin-top:0}
+.switch{position:relative;width:48px;height:28px;flex:none}
+.switch input{opacity:0;width:100%;height:100%;margin:0}
+.switch span{position:absolute;inset:0;background:var(--surface-2);border-radius:999px;pointer-events:none;transition:background .2s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s}
+.switch input:checked + span{background:color-mix(in srgb,var(--break) 40%,transparent)}
+.switch input:checked + span::after{transform:translateX(20px);background:var(--break)}
+
+#toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,90px);
+  background:var(--surface-2);border:1px solid var(--line);
+  padding:12px 18px;border-radius:999px;font-size:14px;z-index:60;
+  transition:transform .25s ease;box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+#toast.show{transform:translate(-50%,0)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+.over #clock{animation:pulse 1.8s ease-in-out infinite}
+</style>
+</head>
+<body data-phase="idle">
+
+<header>
+  <div class="wrap hbar">
+    <div class="brand">En<span>foc</span></div>
+    <nav>
+      <button id="navTimer" aria-current="true">Temporitzador</button>
+      <button id="navLog">Registre</button>
+    </nav>
+    <button class="icon-btn" id="openSettings" aria-label="Ajustos">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h.09A1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ================= TEMPORITZADOR ================= -->
+<main id="viewTimer" class="wrap">
+  <section class="stage">
+    <div class="phase"><i></i><span id="phaseLabel">A punt per començar</span></div>
+    <div class="ring" id="ring">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="track" cx="100" cy="100" r="88"/>
+        <circle class="prog" id="prog" cx="100" cy="100" r="88" stroke-dasharray="552.9" stroke-dashoffset="0"/>
+      </svg>
+      <div class="center">
+        <div id="clock">25:00</div>
+        <div id="clockNote"></div>
+      </div>
+    </div>
+    <div class="dots" id="dots"></div>
+  </section>
+
+  <div class="tally">
+    <div class="u"><b id="tUtil">0 min</b><small>Temps útil</small></div>
+    <div class="d"><b id="tDesc">0 min</b><small>Descans</small></div>
+    <div><b id="tTot">0 min</b><small>Total</small></div>
+  </div>
+
+  <div class="tema">
+    <label for="tema">Tema</label>
+    <input id="tema" type="text" placeholder="opcional — què estudies?" maxlength="80" autocomplete="off">
+  </div>
+
+  <div class="next hidden" id="nextBox">
+    <p id="nextText"></p>
+    <button class="btn primary wide" id="nextBtn"></button>
+  </div>
+
+  <div class="controls" id="mainControls">
+    <button class="btn primary" id="playBtn">
+      <svg id="playIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      <span id="playLabel">Comença</span>
+    </button>
+    <button class="btn stop" id="stopBtn" aria-label="Atura i desa" disabled>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+    </button>
+  </div>
+</main>
+
+<!-- ================= REGISTRE ================= -->
+<main id="viewLog" class="wrap hidden">
+  <div class="seg">
+    <button id="segList" aria-current="true">Llista</button>
+    <button id="segCal">Calendari</button>
+  </div>
+
+  <div class="sync" id="syncBar"><i></i><span>Sense sincronitzar</span></div>
+
+  <div id="listView">
+    <div class="summary">
+      <div><b id="sWeek">0 h</b><small>Aquesta setmana</small></div>
+      <div><b id="sMonth">0 h</b><small>Aquest mes</small></div>
+      <div><b id="sPom">0</b><small>Pomodoros</small></div>
+    </div>
+    <div id="listBody"></div>
+  </div>
+
+  <div id="calView" class="hidden">
+    <div class="calnav">
+      <button class="icon-btn" id="calPrev" aria-label="Mes anterior">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h3 id="calTitle">—</h3>
+      <button class="icon-btn" id="calNext" aria-label="Mes següent">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+    <div class="cal" id="calGrid"></div>
+    <div class="calfoot" id="calDetail"></div>
+  </div>
+
+  <div class="tools">
+    <button class="btn ghost" id="syncBtn">Sincronitza</button>
+    <button class="btn ghost" id="csvBtn">Exporta CSV</button>
+  </div>
+</main>
+
+<!-- ================= DIÀLEGS ================= -->
+<dialog id="dlgStop">
+  <div class="sheet">
+    <h2>Atura la sessió</h2>
+    <p class="sub">Aquest és el resum que es desarà.</p>
+    <div class="recap" id="stopRecap"></div>
+    <div class="field">
+      <label for="notes">Notes de la sessió</label>
+      <textarea id="notes" maxlength="400" placeholder="opcional — què has tret en clar, on ho has deixat…"></textarea>
+    </div>
+    <div class="controls">
+      <button class="btn ghost" id="stopCancel">Continua</button>
+      <button class="btn primary" id="stopSave">Desa</button>
+    </div>
+    <button class="btn wide" id="stopDiscard" style="margin-top:10px;color:var(--danger)">Descarta la sessió</button>
+  </div>
+</dialog>
+
+<dialog id="dlgSettings">
+  <div class="sheet">
+    <h2>Ajustos</h2>
+    <p class="sub">El perfil i el PIN determinen a quin full del Google Sheet van els teus registres.</p>
+    <div class="field"><label for="setName">Nom del perfil</label><input id="setName" type="text" autocomplete="off" placeholder="alex"></div>
+    <div class="field"><label for="setPin">PIN (4 xifres)</label><input id="setPin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••"></div>
+    <div class="field"><label for="setUrl">URL de l'Apps Script</label><input id="setUrl" type="url" autocomplete="off" placeholder="https://script.google.com/macros/s/.../exec"></div>
+    <div class="field"><label for="setGoal">Objectiu diari de temps útil (hores)</label><input id="setGoal" type="text" inputmode="decimal" autocomplete="off" placeholder="2"></div>
+    <div class="field row"><label for="setSound" style="margin:0">Alarmes sonores</label>
+      <span class="switch"><input id="setSound" type="checkbox" checked><span></span></span></div>
+    <div class="field row"><label for="setVibe" style="margin:0">Vibració</label>
+      <span class="switch"><input id="setVibe" type="checkbox" checked><span></span></span></div>
+    <div class="controls">
+      <button class="btn ghost" id="setTest">Prova el so</button>
+      <button class="btn primary" id="setSave">Desa</button>
+    </div>
+  </div>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============ constants ============ */
+var FOCUS = 25*60, BREAK = 5*60, LONG = 15*60, CYCLE = 4;
+var K = {rec:'enfoc.records', set:'enfoc.settings', queue:'enfoc.queue', live:'enfoc.session'};
+var CIRC = 2*Math.PI*88;
+var MESOS = ['gener','febrer','març','abril','maig','juny','juliol','agost','setembre','octubre','novembre','desembre'];
+var DIES = ['diumenge','dilluns','dimarts','dimecres','dijous','divendres','dissabte'];
+var DOW = ['dl','dt','dc','dj','dv','ds','dg'];
+
+var $ = function(id){ return document.getElementById(id); };
+
+/* ============ estat ============ */
+var S = load(K.live, null) || newSession();
+var records = load(K.rec, []);
+var queue = load(K.queue, []);
+var settings = Object.assign({name:'', pin:'', url:'', sound:true, vibe:true, goal:2}, load(K.set, {}));
+var calMonth = new Date(); calMonth.setDate(1);
+var selectedDay = null;
+var lastTick = Date.now();
+
+function newSession(){
+  return {active:false, running:false, phase:'idle', started:null,
+          phaseElapsed:0, focus:0, brk:0, extraFocus:0, extraBrk:0,
+          pomos:0, warned:false, tema:''};
+}
+
+function load(key, def){
+  try{ var v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }
+  catch(e){ return def; }
+}
+function save(key, val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+}
+
+/* ============ format ============ */
+function mmss(s){
+  s = Math.max(0, Math.round(s));
+  var m = Math.floor(s/60), r = s%60;
+  return (m<10?'0':'')+m+':'+(r<10?'0':'')+r;
+}
+function mins(s){ return Math.round(s/60) + ' min'; }
+function hores(s){
+  var h = s/3600;
+  if (h < 1) return Math.round(s/60)+' min';
+  return (Math.round(h*10)/10).toString().replace('.',',')+' h';
+}
+function pad(n){ return (n<10?'0':'')+n; }
+function isoDay(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function hhmm(d){ return pad(d.getHours())+':'+pad(d.getMinutes()); }
+
+/* ============ so ============ */
+var ctx = null;
+function audio(){
+  if (!ctx){
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) ctx = new AC();
+  }
+  if (ctx && ctx.state === 'suspended') ctx.resume();
+  return ctx;
+}
+function beep(freqs, dur, vol){
+  if (!settings.sound) return;
+  var c = audio(); if (!c) return;
+  freqs.forEach(function(f, i){
+    var t = c.currentTime + i*(dur+0.06);
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t+dur+0.05);
+  });
+}
+function vibrate(p){ if (settings.vibe && navigator.vibrate) navigator.vibrate(p); }
+var SOUND = {
+  focusEnd: function(){ beep([784, 1047], .22, .18); vibrate([180,90,180]); },
+  breakEnd: function(){ beep([1047, 784], .22, .18); vibrate([180,90,180]); },
+  warn:     function(){ beep([660], .16, .11); vibrate(70); }
+};
+
+/* ============ wake lock ============ */
+var lock = null;
+function keepAwake(on){
+  try{
+    if (on && !lock && navigator.wakeLock){
+      navigator.wakeLock.request('screen').then(function(l){ lock = l; l.addEventListener('release', function(){ lock = null; }); }).catch(function(){});
+    } else if (!on && lock){ lock.release(); lock = null; }
+  }catch(e){}
+}
+
+/* ============ motor del temporitzador ============ */
+function phaseLength(){
+  if (S.phase === 'focus') return FOCUS;
+  if (S.phase === 'break') return (S.pomos % CYCLE === 0 && S.pomos > 0) ? LONG : BREAK;
+  return 0;
+}
+
+function tick(){
+  var now = Date.now();
+  var dt = (now - lastTick)/1000;
+  lastTick = now;
+  if (dt < 0 || dt > 3600) dt = 0;
+
+  if (S.active && S.running){
+    if (S.phase === 'focus'){
+      S.focus += dt; S.phaseElapsed += dt;
+      if (S.phaseElapsed >= FOCUS){ S.phase = 'focusOver'; S.pomos++; SOUND.focusEnd(); render(); }
+    } else if (S.phase === 'focusOver'){
+      S.focus += dt; S.extraFocus += dt;
+    } else if (S.phase === 'break'){
+      S.brk += dt; S.phaseElapsed += dt;
+      var len = phaseLength();
+      if (!S.warned && len - S.phaseElapsed <= 60 && len > 70){ S.warned = true; SOUND.warn(); }
+      if (S.phaseElapsed >= len){ S.phase = 'breakOver'; SOUND.breakEnd(); render(); }
+    } else if (S.phase === 'breakOver'){
+      S.brk += dt; S.extraBrk += dt;
+    }
+  }
+  paint();
+  if (now - (tick.saved||0) > 4000){ tick.saved = now; save(K.live, S); }
+}
+
+function start(){
+  audio();
+  if (!S.active){
+    S = newSession();
+    S.active = true; S.started = Date.now();
+    S.phase = 'focus'; S.phaseElapsed = 0;
+    S.tema = $('tema').value.trim();
+  }
+  S.running = true;
+  lastTick = Date.now();
+  keepAwake(true);
+  render();
+}
+function pause(){
+  S.running = false; keepAwake(false); save(K.live, S); render();
+}
+function toBreak(){
+  S.phase = 'break'; S.phaseElapsed = 0; S.warned = false;
+  S.running = true; lastTick = Date.now(); keepAwake(true); render();
+}
+function toFocus(){
+  S.phase = 'focus'; S.phaseElapsed = 0;
+  S.running = true; lastTick = Date.now(); keepAwake(true); render();
+}
+
+/* ============ pintat ============ */
+var PHASES = {
+  idle:      {label:'A punt per començar', color:'var(--focus)'},
+  focus:     {label:'Concentració',        color:'var(--focus)'},
+  focusOver: {label:'Temps extra d\u2019estudi', color:'var(--extra)'},
+  break:     {label:'Descans',             color:'var(--break)'},
+  breakOver: {label:'Descans allargat',    color:'var(--extra)'}
+};
+
+function paint(){
+  var p = S.phase, info = PHASES[p];
+  var over = (p === 'focusOver' || p === 'breakOver');
+  var len = phaseLength();
+  var left = len - S.phaseElapsed;
+
+  if (p === 'idle'){
+    $('clock').textContent = mmss(FOCUS);
+    $('prog').setAttribute('stroke-dashoffset', 0);
+  } else if (over){
+    var extra = (p === 'focusOver') ? S.extraFocus : S.extraBrk;
+    $('clock').textContent = '+'+mmss(extra);
+    $('prog').setAttribute('stroke-dashoffset', 0);
+  } else {
+    $('clock').textContent = mmss(left);
+    var frac = Math.min(1, Math.max(0, S.phaseElapsed/len));
+    $('prog').setAttribute('stroke-dashoffset', CIRC*frac);
+  }
+
+  $('phaseLabel').textContent = info.label;
+  document.body.dataset.phase = p;
+  document.documentElement.style.setProperty('--accent', info.color);
+  $('ring').classList.toggle('over', over);
+  $('ring').classList.toggle('paused', S.active && !S.running);
+
+  var note = '';
+  if (S.active && !S.running) note = 'En pausa';
+  else if (p === 'focus') note = 'Pomodoro ' + (S.pomos+1);
+  else if (p === 'break') note = (len === LONG ? 'Descans llarg' : 'Descans curt');
+  $('clockNote').textContent = note;
+
+  $('tUtil').textContent = mins(S.focus);
+  $('tDesc').textContent = mins(S.brk);
+  $('tTot').textContent = mins(S.focus + S.brk);
+}
+
+function render(){
+  var p = S.phase, over = (p === 'focusOver' || p === 'breakOver');
+  $('nextBox').classList.toggle('hidden', !over);
+  $('mainControls').classList.toggle('hidden', over);
+
+  if (over){
+    if (p === 'focusOver'){
+      $('nextText').innerHTML = 'Pomodoro completat. Cada minut de més compta com a temps útil.';
+      $('nextBtn').textContent = 'Comença el descans';
+    } else {
+      $('nextText').innerHTML = 'Descans acabat. El temps de més se suma al descans.';
+      $('nextBtn').textContent = 'Torna a concentrar-te';
+    }
+  }
+
+  $('playLabel').textContent = !S.active ? 'Comença' : (S.running ? 'Pausa' : 'Reprèn');
+  $('playIcon').innerHTML = (S.active && S.running)
+    ? '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>'
+    : '<path d="M8 5v14l11-7z"/>';
+  $('stopBtn').disabled = !S.active;
+
+  var doneCount = (S.pomos > 0 && S.pomos % CYCLE === 0) ? CYCLE : S.pomos % CYCLE;
+  var dots = '';
+  for (var i=0;i<CYCLE;i++){
+    dots += '<i class="'+(i < doneCount ? 'on' : '')+'"></i>';
+  }
+  $('dots').innerHTML = dots;
+  paint();
+}
+
+/* ============ desar sessió ============ */
+function recap(){
+  return {
+    total: S.focus + S.brk,
+    util: S.focus,
+    desc: S.brk,
+    extraF: S.extraFocus,
+    extraB: S.extraBrk,
+    pomos: S.pomos
+  };
+}
+function openStop(){
+  var r = recap();
+  $('stopRecap').innerHTML =
+    '<div><span>Temps total</span><b>'+mins(r.total)+'</b></div>' +
+    '<div><span>Temps útil</span><b>'+mins(r.util)+'</b></div>' +
+    '<div><span>Descans</span><b>'+mins(r.desc)+'</b></div>' +
+    '<div><span>Pomodoros</span><b>'+r.pomos+'</b></div>' +
+    (r.extraF > 30 ? '<div><span>Del qual, extra d\u2019estudi</span><b>'+mins(r.extraF)+'</b></div>' : '');
+  S.running = false; keepAwake(false);
+  $('dlgStop').showModal();
+  render();
+}
+function commit(keep){
+  if (keep && (S.focus + S.brk) > 30){
+    var end = new Date(), ini = new Date(S.started);
+    var rec = {
+      id: 'e'+S.started+'-'+Math.random().toString(36).slice(2,7),
+      data: isoDay(ini),
+      inici: hhmm(ini),
+      fi: hhmm(end),
+      total: Math.round(S.focus + S.brk),
+      util: Math.round(S.focus),
+      descans: Math.round(S.brk),
+      extra: Math.round(S.extraFocus),
+      pomos: S.pomos,
+      tema: (S.tema || $('tema').value.trim()),
+      notes: $('notes').value.trim()
+    };
+    records.push(rec);
+    records.sort(function(a,b){ return (b.data+b.inici).localeCompare(a.data+a.inici); });
+    save(K.rec, records);
+    queue.push(rec);
+    save(K.queue, queue);
+    toast('Sessió desada: '+mins(S.focus)+' útils');
+    flush(true);
+  } else if (keep){
+    toast('Sessió massa curta, no s\u2019ha desat');
+  }
+  S = newSession();
+  save(K.live, S);
+  $('tema').value = '';
+  $('notes').value = '';
+  render();
+  renderLog();
+}
+
+/* ============ sincronització ============ */
+function endpointReady(){ return !!(settings.url && settings.name && settings.pin); }
+function profileKey(){
+  return settings.name.toLowerCase().replace(/[^a-z0-9]/g,'') + '_' + settings.pin;
+}
+function setSync(state, text){
+  var bar = $('syncBar');
+  bar.className = 'sync' + (state ? ' '+state : '');
+  bar.querySelector('span').textContent = text;
+}
+function flush(quiet){
+  if (!endpointReady()){ if(!quiet) setSync('bad','Configura el perfil i l\u2019URL als ajustos'); return Promise.resolve(); }
+  if (!queue.length){ setSync('ok','Tot sincronitzat'); return Promise.resolve(); }
+  setSync('', 'Sincronitzant '+queue.length+'…');
+  return fetch(settings.url, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body: JSON.stringify({action:'append', key:profileKey(), records:queue})
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if (res && res.ok){ queue = []; save(K.queue, queue); setSync('ok','Tot sincronitzat'); }
+    else { setSync('bad','El servidor ha respost amb un error'); }
+  }).catch(function(){
+    setSync('bad', queue.length+' sessions pendents de pujar');
+  });
+}
+function pull(){
+  if (!endpointReady()){ toast('Falta configurar el Google Sheet'); return; }
+  setSync('','Baixant del full…');
+  fetch(settings.url + '?action=list&key=' + encodeURIComponent(profileKey()))
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (!res || !res.ok) throw new Error();
+      var seen = {}; records.forEach(function(r){ seen[r.id] = true; });
+      var add = (res.records||[]).filter(function(r){ return !seen[r.id]; });
+      records = records.concat(add);
+      records.sort(function(a,b){ return (b.data+b.inici).localeCompare(a.data+a.inici); });
+      save(K.rec, records);
+      setSync('ok','Tot sincronitzat'+(add.length?' · '+add.length+' de noves':''));
+      renderLog();
+    })
+    .catch(function(){ setSync('bad','No s\u2019ha pogut connectar amb el full'); });
+}
+
+/* ============ registre: llista ============ */
+function groupByDay(){
+  var g = {};
+  records.forEach(function(r){ (g[r.data] = g[r.data] || []).push(r); });
+  return Object.keys(g).sort().reverse().map(function(d){ return {dia:d, items:g[d]}; });
+}
+function dayLabel(iso){
+  var p = iso.split('-'), d = new Date(+p[0], +p[1]-1, +p[2]);
+  var today = isoDay(new Date());
+  var yest = new Date(); yest.setDate(yest.getDate()-1);
+  if (iso === today) return 'Avui';
+  if (iso === isoDay(yest)) return 'Ahir';
+  return DIES[d.getDay()] + ' ' + d.getDate() + ' de ' + MESOS[d.getMonth()];
+}
+function esc(s){
+  return String(s||'').replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+  });
+}
+function recRow(r){
+  var tema = r.tema ? esc(r.tema) : 'Sense tema';
+  return '<div class="rec"><div class="hour">'+r.inici+' – '+r.fi+'</div>' +
+    '<div class="mid"><b>'+mins(r.util)+' útils</b><small>'+tema+' · '+mins(r.descans)+' de descans</small>' +
+    (r.notes ? '<small class="note">'+esc(r.notes)+'</small>' : '') + '</div>' +
+    '<span class="pill">'+r.pomos+' pom</span>' +
+    '<button class="del" data-del="'+r.id+'" aria-label="Esborra">' +
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button></div>';
+}
+function renderList(){
+  var groups = groupByDay();
+  if (!groups.length){
+    $('listBody').innerHTML = '<div class="empty">Encara no hi ha sessions.<br>Fes el primer pomodoro i apareixerà aquí.</div>';
+  } else {
+    $('listBody').innerHTML = groups.map(function(g){
+      var tot = g.items.reduce(function(a,r){ return a + r.util; }, 0);
+      return '<div class="daygroup"><div class="dayhead"><h3>'+dayLabel(g.dia)+'</h3><span>'+hores(tot)+' útils</span></div>' +
+        g.items.map(recRow).join('') + '</div>';
+    }).join('');
+  }
+  var now = new Date();
+  var monday = new Date(now); monday.setDate(now.getDate() - ((now.getDay()+6)%7)); monday.setHours(0,0,0,0);
+  var w = 0, m = 0, p = 0;
+  records.forEach(function(r){
+    var pr = r.data.split('-'), d = new Date(+pr[0], +pr[1]-1, +pr[2]);
+    if (d >= monday) w += r.util;
+    if (d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()){ m += r.util; p += r.pomos; }
+  });
+  $('sWeek').textContent = hores(w);
+  $('sMonth').textContent = hores(m);
+  $('sPom').textContent = p;
+}
+
+/* ============ registre: calendari ============ */
+function goalSecs(){
+  var g = parseFloat(String(settings.goal).replace(',','.'));
+  return (isFinite(g) && g > 0) ? g*3600 : 0;
+}
+function renderCal(){
+  var y = calMonth.getFullYear(), mo = calMonth.getMonth();
+  $('calTitle').textContent = MESOS[mo].charAt(0).toUpperCase()+MESOS[mo].slice(1)+' '+y;
+
+  var totals = {};
+  records.forEach(function(r){ totals[r.data] = (totals[r.data]||0) + r.util; });
+  var meta = goalSecs();
+
+  var first = new Date(y, mo, 1);
+  var offset = (first.getDay()+6)%7;
+  var start = new Date(y, mo, 1-offset);
+  var html = DOW.map(function(d){ return '<div class="dow">'+d+'</div>'; }).join('');
+  var today = isoDay(new Date());
+
+  for (var i=0;i<42;i++){
+    var d = new Date(start); d.setDate(start.getDate()+i);
+    var iso = isoDay(d);
+    var v = totals[iso] || 0;
+    var fet = meta && v >= meta;
+    var cls = 'cal-day' + (d.getMonth()!==mo ? ' out':'') + (iso===today ? ' today':'') + (fet ? ' goal':'');
+    html += '<button class="'+cls+'" data-day="'+iso+'" aria-pressed="'+(selectedDay===iso)+'">' +
+      '<span>'+d.getDate()+'</span>' +
+      (v ? '<em>'+Math.round(v/60)+'</em>' : '') +
+      (fet ? '<span class="tick"></span>' : '') +
+      '</button>';
+  }
+  $('calGrid').innerHTML = html;
+
+  if (selectedDay){
+    var items = records.filter(function(r){ return r.data === selectedDay; });
+    var tot = items.reduce(function(a,r){ return a+r.util; }, 0);
+    $('calDetail').innerHTML = items.length
+      ? '<div class="dayhead"><h3>'+dayLabel(selectedDay)+'</h3><span>'+hores(tot)+' útils'+(meta && tot>=meta ? ' · objectiu fet' : '')+'</span></div>' + items.map(recRow).join('')
+      : '<div class="empty">Cap sessió el '+dayLabel(selectedDay).toLowerCase()+'.</div>';
+  } else {
+    var mtot = 0, dies = 0;
+    Object.keys(totals).forEach(function(k){
+      if (k.indexOf(y+'-'+pad(mo+1))===0){ mtot += totals[k]; if (meta && totals[k] >= meta) dies++; }
+    });
+    $('calDetail').innerHTML = '<div class="empty">'+ (mtot
+      ? hores(mtot)+' d\u2019estudi aquest mes'+(meta ? ', amb l\u2019objectiu fet '+dies+(dies===1?' dia':' dies') : '')+'. Toca un dia per veure\u2019n les sessions.'
+      : 'Cap sessió aquest mes.') +'</div>';
+  }
+  var leg = meta ? '<div class="callegend"><i></i><span>Dia amb l\u2019objectiu de '+hores(meta)+' assolit</span></div>' : '';
+  $('calDetail').insertAdjacentHTML('afterbegin', leg);
+}
+function renderLog(){ renderList(); renderCal(); }
+
+/* ============ CSV ============ */
+function csv(){
+  var head = 'id,data,inici,fi,total_min,util_min,descans_min,extra_min,pomodoros,tema,notes\n';
+  var body = records.map(function(r){
+    return [r.id, r.data, r.inici, r.fi, Math.round(r.total/60), Math.round(r.util/60),
+            Math.round(r.descans/60), Math.round(r.extra/60), r.pomos,
+            '"'+(r.tema||'').replace(/"/g,'""')+'"',
+            '"'+(r.notes||'').replace(/"/g,'""')+'"'].join(',');
+  }).join('\n');
+  var blob = new Blob([head+body], {type:'text/csv;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'enfoc-'+isoDay(new Date())+'.csv';
+  a.click();
+}
+
+/* ============ toast ============ */
+var toastTimer;
+function toast(msg){
+  var t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2600);
+}
+
+/* ============ esdeveniments ============ */
+$('playBtn').onclick = function(){ if (!S.active || !S.running) start(); else pause(); };
+$('stopBtn').onclick = openStop;
+$('nextBtn').onclick = function(){ audio(); if (S.phase === 'focusOver') toBreak(); else toFocus(); };
+$('tema').oninput = function(){ S.tema = this.value.trim(); };
+
+$('stopCancel').onclick = function(){ $('dlgStop').close(); };
+$('stopSave').onclick = function(){ $('dlgStop').close(); commit(true); };
+$('stopDiscard').onclick = function(){ $('dlgStop').close(); commit(false); };
+
+$('navTimer').onclick = function(){ showView('timer'); };
+$('navLog').onclick = function(){ showView('log'); };
+function showView(v){
+  $('viewTimer').classList.toggle('hidden', v!=='timer');
+  $('viewLog').classList.toggle('hidden', v!=='log');
+  $('navTimer').setAttribute('aria-current', v==='timer');
+  $('navLog').setAttribute('aria-current', v==='log');
+  if (v==='log'){ renderLog(); flush(true); }
+  window.scrollTo(0,0);
+}
+$('segList').onclick = function(){ segTo('list'); };
+$('segCal').onclick = function(){ segTo('cal'); };
+function segTo(v){
+  $('listView').classList.toggle('hidden', v!=='list');
+  $('calView').classList.toggle('hidden', v!=='cal');
+  $('segList').setAttribute('aria-current', v==='list');
+  $('segCal').setAttribute('aria-current', v==='cal');
+}
+
+$('calPrev').onclick = function(){ calMonth.setMonth(calMonth.getMonth()-1); selectedDay=null; renderCal(); };
+$('calNext').onclick = function(){ calMonth.setMonth(calMonth.getMonth()+1); selectedDay=null; renderCal(); };
+$('calGrid').onclick = function(e){
+  var b = e.target.closest('button[data-day]'); if (!b) return;
+  selectedDay = (selectedDay === b.dataset.day) ? null : b.dataset.day;
+  renderCal();
+};
+document.addEventListener('click', function(e){
+  var d = e.target.closest('[data-del]'); if (!d) return;
+  if (!confirm('Vols esborrar aquesta sessió del registre local?')) return;
+  records = records.filter(function(r){ return r.id !== d.dataset.del; });
+  save(K.rec, records); renderLog();
+});
+
+$('syncBtn').onclick = function(){ flush().then(pull); };
+$('csvBtn').onclick = csv;
+
+$('openSettings').onclick = function(){
+  $('setName').value = settings.name; $('setPin').value = settings.pin;
+  $('setUrl').value = settings.url; $('setSound').checked = settings.sound;
+  $('setVibe').checked = settings.vibe; $('setGoal').value = settings.goal;
+  $('dlgSettings').showModal();
+};
+$('setTest').onclick = function(){ audio(); settings.sound = $('setSound').checked; SOUND.focusEnd(); };
+$('setSave').onclick = function(){
+  settings = {
+    name: $('setName').value.trim(),
+    pin: $('setPin').value.trim(),
+    url: $('setUrl').value.trim(),
+    sound: $('setSound').checked,
+    vibe: $('setVibe').checked,
+    goal: $('setGoal').value.trim() || 0
+  };
+  save(K.set, settings);
+  $('dlgSettings').close();
+  toast('Ajustos desats');
+  renderLog();
+  flush(true);
+};
+
+document.addEventListener('visibilitychange', function(){
+  if (!document.hidden){ lastTick = Date.now(); tick(); if (S.active && S.running) keepAwake(true); }
+  else save(K.live, S);
+});
+window.addEventListener('beforeunload', function(e){
+  save(K.live, S);
+  if (S.active){ e.preventDefault(); e.returnValue = ''; }
+});
+document.addEventListener('keydown', function(e){
+  if (e.target.tagName === 'INPUT' || document.querySelector('dialog[open]')) return;
+  if (e.code === 'Space'){ e.preventDefault(); $('playBtn').click(); }
+});
+
+/* ============ arrencada ============ */
+if (S.active){ S.running = false; }   // en tornar, sempre en pausa
+$('tema').value = S.tema || '';
+render();
+renderLog();
+setSync(endpointReady() ? '' : 'bad', endpointReady() ? (queue.length ? queue.length+' sessions pendents' : 'Tot sincronitzat') : 'Configura el perfil i l\u2019URL als ajustos');
+setInterval(tick, 250);
+if (!settings.url) setTimeout(function(){ toast('Obre els ajustos per connectar el Google Sheet'); }, 900);
+})();
+</script>
+</body>
+</html>
