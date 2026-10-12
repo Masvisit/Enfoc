@@ -563,7 +563,13 @@ function render(){
     }
   }
   $('skipBtn').classList.toggle('hidden', p !== 'focusOver');
-  $('skipNow').classList.toggle('hidden', p !== 'break');
+  var canSkip = (p === 'focus' || p === 'break');
+  $('skipNow').classList.toggle('hidden', !canSkip);
+  if (canSkip){
+    var lbl = (p === 'focus') ? 'Acaba i ves al descans' : 'Salta el descans';
+    $('skipNow').setAttribute('aria-label', lbl);
+    $('skipNow').setAttribute('title', lbl);
+  }
 
   $('playLabel').textContent = !S.active ? 'Comença' : (S.running ? 'Pausa' : 'Reprèn');
   $('playIcon').innerHTML = (S.active && S.running)
@@ -816,8 +822,17 @@ $('skipBtn').onclick = function(){ audio(); toFocus(); toast('Descans saltat'); 
 $('skipNow').onclick = function(){
   audio();
   var fet = Math.round(S.phaseElapsed);
-  toFocus();
-  toast(fet > 30 ? 'Descans saltat després de '+mmss(fet) : 'Descans saltat');
+  if (S.phase === 'focus'){
+    var compta = fet >= FOCUS/2;
+    if (compta) S.pomos++;
+    toBreak();
+    toast(compta
+      ? 'Pomodoro tancat a '+mmss(fet)
+      : 'Concentració tallada a '+mmss(fet)+' — no compta com a pomodoro');
+  } else {
+    toFocus();
+    toast(fet > 30 ? 'Descans saltat després de '+mmss(fet) : 'Descans saltat');
+  }
 };
 $('tema').oninput = function(){ S.tema = this.value.trim(); };
 
