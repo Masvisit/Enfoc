@@ -331,6 +331,21 @@ dialog::backdrop{background:rgba(10,14,19,.7)}
   </div>
 </dialog>
 
+<dialog id="dlgRecover">
+  <div class="sheet">
+    <h2>El compte s'ha aturat</h2>
+    <p class="sub" id="recText"></p>
+    <div class="field">
+      <label for="recMin">Quants minuts vas estar estudiant?</label>
+      <input id="recMin" type="text" inputmode="numeric" autocomplete="off">
+    </div>
+    <div class="controls">
+      <button class="btn ghost" id="recNone">Cap</button>
+      <button class="btn primary" id="recAdd">Afegeix-los</button>
+    </div>
+  </div>
+</dialog>
+
 <dialog id="dlgSettings">
   <div class="sheet">
     <h2>Ajustos</h2>
@@ -358,6 +373,8 @@ dialog::backdrop{background:rgba(10,14,19,.7)}
 
 /* ============ constants ============ */
 var FOCUS = 25*60, BREAK = 5*60, LONG = 15*60, CYCLE = 4;
+var GAP_LIMIT = 10*60;   // salt dins la pàgina que ja no es dóna per estudiat
+var GRACE = 60;          // marge en recarregar: per sota, es compta sense preguntar
 var K = {rec:'enfoc.records', set:'enfoc.settings', queue:'enfoc.queue', live:'enfoc.session'};
 var CIRC = 2*Math.PI*88;
 var MESOS = ['gener','febrer','març','abril','maig','juny','juliol','agost','setembre','octubre','novembre','desembre'];
@@ -378,7 +395,7 @@ var lastTick = Date.now();
 function newSession(){
   return {active:false, running:false, phase:'idle', started:null,
           phaseElapsed:0, focus:0, brk:0, extraFocus:0, extraBrk:0,
-          pomos:0, warned:false, tema:''};
+          pomos:0, warned:false, tema:'', beat:null, gap:0};
 }
 
 function load(key, def){
@@ -453,29 +470,65 @@ function phaseLength(){
   return 0;
 }
 
+/* Afegeix "secs" a la fase actual respectant els límits de cada període.
+   S'usa tant pel pas normal del temps com per recuperar un tall. */
+function applyTime(secs, silent){
+  if (secs <= 0) return;
+  if (S.phase === 'focus'){
+    var rem = FOCUS - S.phaseElapsed;
+    S.focus += secs;
+    if (secs < rem){ S.phaseElapsed += secs; }
+    else {
+      S.phaseElapsed = FOCUS; S.extraFocus += (secs - rem);
+      S.phase = 'focusOver'; S.pomos++;
+      if (!silent) SOUND.focusEnd();
+      render();
+    }
+  } else if (S.phase === 'focusOver'){
+    S.focus += secs; S.extraFocus += secs;
+  } else if (S.phase === 'break'){
+    var len = phaseLength(), rem2 = len - S.phaseElapsed;
+    S.brk += secs;
+    if (secs < rem2){
+      S.phaseElapsed += secs;
+      if (!S.warned && len - S.phaseElapsed <= 60 && len > 70){ S.warned = true; if(!silent) SOUND.warn(); }
+    } else {
+      S.phaseElapsed = len; S.extraBrk += (secs - rem2);
+      S.phase = 'breakOver';
+      if (!silent) SOUND.breakEnd();
+      render();
+    }
+  } else if (S.phase === 'breakOver'){
+    S.brk += secs; S.extraBrk += secs;
+  }
+}
+
+/* Un salt gran vol dir que l'ordinador ha dormit o s'ha bloquejat:
+   congelem la sessió i preguntem, en comptes de donar-ho per estudiat. */
+function flagGap(secs){
+  S.running = false; keepAwake(false);
+  S.gap = Math.round((S.gap || 0) + secs);
+  save(K.live, S);
+  render();
+  askGap();
+}
+
 function tick(){
   var now = Date.now();
   var dt = (now - lastTick)/1000;
   lastTick = now;
-  if (dt < 0 || dt > 3600) dt = 0;
+  if (dt < 0) dt = 0;
 
   if (S.active && S.running){
-    if (S.phase === 'focus'){
-      S.focus += dt; S.phaseElapsed += dt;
-      if (S.phaseElapsed >= FOCUS){ S.phase = 'focusOver'; S.pomos++; SOUND.focusEnd(); render(); }
-    } else if (S.phase === 'focusOver'){
-      S.focus += dt; S.extraFocus += dt;
-    } else if (S.phase === 'break'){
-      S.brk += dt; S.phaseElapsed += dt;
-      var len = phaseLength();
-      if (!S.warned && len - S.phaseElapsed <= 60 && len > 70){ S.warned = true; SOUND.warn(); }
-      if (S.phaseElapsed >= len){ S.phase = 'breakOver'; SOUND.breakEnd(); render(); }
-    } else if (S.phase === 'breakOver'){
-      S.brk += dt; S.extraBrk += dt;
-    }
+    if (dt > GAP_LIMIT) flagGap(dt);
+    else applyTime(dt);
   }
   paint();
-  if (now - (tick.saved||0) > 4000){ tick.saved = now; save(K.live, S); }
+  if (now - (tick.saved||0) > 4000){
+    tick.saved = now;
+    if (S.active && S.running) S.beat = now;
+    save(K.live, S);
+  }
 }
 
 function start(){
@@ -487,7 +540,7 @@ function start(){
     S.tema = $('tema').value.trim();
   }
   S.running = true;
-  lastTick = Date.now();
+  lastTick = S.beat = Date.now();
   keepAwake(true);
   render();
 }
@@ -496,11 +549,11 @@ function pause(){
 }
 function toBreak(){
   S.phase = 'break'; S.phaseElapsed = 0; S.warned = false;
-  S.running = true; lastTick = Date.now(); keepAwake(true); render();
+  S.running = true; lastTick = S.beat = Date.now(); keepAwake(true); render();
 }
 function toFocus(){
   S.phase = 'focus'; S.phaseElapsed = 0;
-  S.running = true; lastTick = Date.now(); keepAwake(true); render();
+  S.running = true; lastTick = S.beat = Date.now(); keepAwake(true); render();
 }
 
 /* ============ pintat ============ */
@@ -584,6 +637,25 @@ function render(){
   }
   $('dots').innerHTML = dots;
   paint();
+}
+
+/* ============ recuperació d'un tall ============ */
+function askGap(){
+  if (!S.gap || $('dlgRecover').open) return;
+  var m = Math.round(S.gap/60);
+  var fase = (S.phase === 'break' || S.phase === 'breakOver') ? 'el descans' : 'la concentració';
+  $('recText').textContent = 'Han passat ' + m + ' minuts sense que l’app comptés, durant ' + fase +
+    '. Pot ser que l’ordinador es bloquegés o que es tanqués el navegador. Digues quants minuts hi vas dedicar de debò.';
+  $('recMin').value = m;
+  $('dlgRecover').showModal();
+}
+function closeGap(secs){
+  applyTime(Math.max(0, secs), true);
+  S.gap = 0;
+  save(K.live, S);
+  $('dlgRecover').close();
+  render();
+  if (secs > 0) toast('Afegits ' + Math.round(secs/60) + ' min recuperats');
 }
 
 /* ============ desar sessió ============ */
@@ -836,6 +908,13 @@ $('skipNow').onclick = function(){
 };
 $('tema').oninput = function(){ S.tema = this.value.trim(); };
 
+$('recAdd').onclick = function(){
+  var v = parseInt(String($('recMin').value).replace(/[^0-9]/g,''), 10);
+  if (!isFinite(v) || v < 0) v = 0;
+  closeGap(Math.min(v*60, S.gap));
+};
+$('recNone').onclick = function(){ closeGap(0); };
+
 $('stopCancel').onclick = function(){ $('dlgStop').close(); };
 $('stopSave').onclick = function(){ $('dlgStop').close(); commit(true); };
 $('stopDiscard').onclick = function(){ $('dlgStop').close(); commit(false); };
@@ -913,9 +992,19 @@ document.addEventListener('keydown', function(e){
 });
 
 /* ============ arrencada ============ */
-if (S.active){ S.running = false; }   // en tornar, sempre en pausa
+/* La sessió es recupera sempre en pausa. Si el comptador corria quan la
+   pàgina va morir, mirem quant fa de l'últim senyal de vida. */
+var diedRunning = S.active && S.running;
+if (S.active){ S.running = false; }
+if (diedRunning && S.beat){
+  var away = (Date.now() - S.beat)/1000;
+  if (away > 0 && away <= GRACE) applyTime(away, true);      // recàrrega normal
+  else if (away > GRACE) S.gap = Math.round((S.gap||0) + away);
+  save(K.live, S);
+}
 $('tema').value = S.tema || '';
 render();
+if (S.gap) setTimeout(askGap, 400);
 renderLog();
 setSync(endpointReady() ? '' : 'bad', endpointReady() ? (queue.length ? queue.length+' sessions pendents' : 'Tot sincronitzat') : 'Configura el perfil i l\u2019URL als ajustos');
 setInterval(tick, 250);
