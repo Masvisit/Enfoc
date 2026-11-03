@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#141d27">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icona.svg" type="image/svg+xml">
 <title>Enfoc — pomodoro i registre d'estudi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -221,6 +223,9 @@ dialog::backdrop{background:rgba(10,14,19,.7)}
       <button id="navTimer" aria-current="true">Temporitzador</button>
       <button id="navLog">Registre</button>
     </nav>
+    <button class="icon-btn hidden" id="pipBtn" aria-label="Finestra flotant" title="Finestra flotant sempre al damunt">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><rect x="12" y="11" width="8" height="6" rx="1" fill="currentColor"/></svg>
+    </button>
     <button class="icon-btn" id="openSettings" aria-label="Ajustos">
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h.09A1.65 1.65 0 0 0 10 3.09V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -565,21 +570,30 @@ var PHASES = {
   breakOver: {label:'Descans allargat',    color:'var(--extra)'}
 };
 
+function clockText(){
+  var p = S.phase;
+  if (p === 'idle') return mmss(FOCUS);
+  if (p === 'focusOver') return '+'+mmss(S.extraFocus);
+  if (p === 'breakOver') return '+'+mmss(S.extraBrk);
+  return mmss(phaseLength() - S.phaseElapsed);
+}
+function noteText(){
+  var p = S.phase;
+  if (S.active && !S.running) return 'En pausa';
+  if (p === 'focus') return 'Pomodoro ' + (S.pomos+1);
+  if (p === 'break') return (phaseLength() === LONG ? 'Descans llarg' : 'Descans curt');
+  return '';
+}
+
 function paint(){
   var p = S.phase, info = PHASES[p];
   var over = (p === 'focusOver' || p === 'breakOver');
   var len = phaseLength();
-  var left = len - S.phaseElapsed;
 
-  if (p === 'idle'){
-    $('clock').textContent = mmss(FOCUS);
-    $('prog').setAttribute('stroke-dashoffset', 0);
-  } else if (over){
-    var extra = (p === 'focusOver') ? S.extraFocus : S.extraBrk;
-    $('clock').textContent = '+'+mmss(extra);
+  $('clock').textContent = clockText();
+  if (p === 'idle' || over){
     $('prog').setAttribute('stroke-dashoffset', 0);
   } else {
-    $('clock').textContent = mmss(left);
     var frac = Math.min(1, Math.max(0, S.phaseElapsed/len));
     $('prog').setAttribute('stroke-dashoffset', CIRC*frac);
   }
@@ -590,15 +604,12 @@ function paint(){
   $('ring').classList.toggle('over', over);
   $('ring').classList.toggle('paused', S.active && !S.running);
 
-  var note = '';
-  if (S.active && !S.running) note = 'En pausa';
-  else if (p === 'focus') note = 'Pomodoro ' + (S.pomos+1);
-  else if (p === 'break') note = (len === LONG ? 'Descans llarg' : 'Descans curt');
-  $('clockNote').textContent = note;
+  $('clockNote').textContent = noteText();
 
   $('tUtil').textContent = mins(S.focus);
   $('tDesc').textContent = mins(S.brk);
   $('tTot').textContent = mins(S.focus + S.brk);
+  pipPaint();
 }
 
 function render(){
@@ -637,6 +648,113 @@ function render(){
   }
   $('dots').innerHTML = dots;
   paint();
+}
+
+/* ============ finestra flotant (Document Picture-in-Picture) ============ */
+var pip = null;
+var PIPCOL = {idle:'#e8b33c', focus:'#e8b33c', focusOver:'#ef8a5a', break:'#6fc3a6', breakOver:'#ef8a5a'};
+var PIPBG  = {idle:'#141d27', focus:'#141d27', focusOver:'#1e1a21', break:'#122622', breakOver:'#1e1a21'};
+var PIP_CSS =
+'*{box-sizing:border-box;margin:0}' +
+'body{background:#141d27;color:#f1ece2;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;' +
+'height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;' +
+'transition:background .5s ease;-webkit-user-select:none;user-select:none}' +
+'.pw{display:flex;flex-direction:column;align-items:center;gap:1vh;width:100%;max-width:290px;padding:3%}' +
+'.ph{font-size:clamp(10px,4.2vh,15px);font-weight:600;color:var(--a);text-align:center;' +
+'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}' +
+'.pc{font-size:clamp(26px,17vh,58px);font-weight:600;letter-spacing:-.03em;line-height:1;' +
+'font-variant-numeric:tabular-nums}' +
+'.pn{font-size:clamp(9px,3.4vh,12px);color:#9aabb8;min-height:1em}' +
+'.pr{display:flex;gap:2.5%;width:100%;justify-content:center;margin-top:.5vh}' +
+'.pb{flex:1;max-width:38%;border:0;border-radius:9px;background:#25333f;color:#f1ece2;' +
+'padding:1.4vh 0;cursor:pointer;display:flex;align-items:center;justify-content:center;' +
+'font:inherit;font-size:clamp(10px,3.6vh,13px);font-weight:600;min-height:26px}' +
+'.pb svg{width:clamp(12px,4vh,17px);height:clamp(12px,4vh,17px)}' +
+'.pb.main{background:var(--a);color:#12181f}' +
+'.pb.stop{color:#e8695a;max-width:19%}' +
+'.pb:hover{filter:brightness(1.12)}' +
+'.pb.hide{display:none}' +
+'.paused .pc{opacity:.45}' +
+'@media (prefers-reduced-motion:reduce){*{transition:none!important}}';
+
+var ICO = {
+  play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
+  skip:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 5v14l9-7z"/><rect x="16" y="5" width="3" height="14" rx="1"/></svg>',
+  stop:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>'
+};
+
+function pipOn(){ return !!(pip && !pip.closed); }
+
+function openPip(){
+  if (!('documentPictureInPicture' in window)){
+    toast('Aquest navegador no té finestra flotant'); return;
+  }
+  if (pipOn()){ try{ pip.focus(); }catch(e){} return; }
+  documentPictureInPicture.requestWindow({width:230, height:185}).then(function(w){
+    pip = w;
+    var d = w.document;
+    d.title = 'Enfoc';
+    var st = d.createElement('style'); st.textContent = PIP_CSS; d.head.appendChild(st);
+    d.body.innerHTML =
+      '<div class="pw">' +
+      '<div class="ph" id="pPhase"></div>' +
+      '<div class="pc" id="pClock">--:--</div>' +
+      '<div class="pn" id="pNote"></div>' +
+      '<div class="pr">' +
+        '<button class="pb main" id="pPlay"></button>' +
+        '<button class="pb" id="pSkip"></button>' +
+        '<button class="pb stop" id="pStop"></button>' +
+      '</div></div>';
+
+    d.getElementById('pPlay').onclick = function(){
+      audio();
+      if (S.phase === 'focusOver') toBreak();
+      else if (S.phase === 'breakOver') toFocus();
+      else if (!S.active || !S.running) start();
+      else pause();
+    };
+    d.getElementById('pSkip').onclick = doSkip;
+    d.getElementById('pStop').onclick = function(){
+      try{ window.focus(); }catch(e){}
+      openStop();
+    };
+    w.addEventListener('pagehide', function(){ pip = null; render(); });
+    render();
+    toast('Finestra flotant oberta');
+  }).catch(function(){
+    toast('No s’ha pogut obrir la finestra flotant');
+  });
+}
+
+function pipPaint(){
+  if (!pipOn()) return;
+  var d = pip.document, p = S.phase;
+  var el = d.getElementById('pClock');
+  if (!el) return;
+  var over = (p === 'focusOver' || p === 'breakOver');
+
+  d.documentElement.style.setProperty('--a', PIPCOL[p] || '#e8b33c');
+  d.body.style.background = PIPBG[p] || '#141d27';
+  d.body.classList.toggle('paused', S.active && !S.running);
+
+  el.textContent = clockText();
+  d.getElementById('pPhase').textContent = PHASES[p].label;
+  d.getElementById('pNote').textContent = noteText();
+
+  var play = d.getElementById('pPlay');
+  if (p === 'focusOver')      play.innerHTML = 'Descans';
+  else if (p === 'breakOver') play.innerHTML = 'Segueix';
+  else play.innerHTML = (S.active && S.running) ? ICO.pause : ICO.play;
+
+  var skip = d.getElementById('pSkip');
+  var pots = (p === 'focus' || p === 'break' || p === 'focusOver');
+  skip.classList.toggle('hide', !pots);
+  if (pots) skip.innerHTML = ICO.skip;
+
+  var stop = d.getElementById('pStop');
+  stop.classList.toggle('hide', !S.active);
+  stop.innerHTML = ICO.stop;
 }
 
 /* ============ recuperació d'un tall ============ */
@@ -890,22 +1008,24 @@ function toast(msg){
 $('playBtn').onclick = function(){ if (!S.active || !S.running) start(); else pause(); };
 $('stopBtn').onclick = openStop;
 $('nextBtn').onclick = function(){ audio(); if (S.phase === 'focusOver') toBreak(); else toFocus(); };
-$('skipBtn').onclick = function(){ audio(); toFocus(); toast('Descans saltat'); };
-$('skipNow').onclick = function(){
+function doSkip(){
   audio();
   var fet = Math.round(S.phaseElapsed);
-  if (S.phase === 'focus'){
+  var era = S.phase;
+  if (era === 'focusOver' || era === 'break'){
+    toFocus();
+    toast(era === 'break' && fet > 30 ? 'Descans saltat després de '+mmss(fet) : 'Descans saltat');
+  } else if (era === 'focus'){
     var compta = fet >= FOCUS/2;
     if (compta) S.pomos++;
     toBreak();
     toast(compta
       ? 'Pomodoro tancat a '+mmss(fet)
       : 'Concentració tallada a '+mmss(fet)+' — no compta com a pomodoro');
-  } else {
-    toFocus();
-    toast(fet > 30 ? 'Descans saltat després de '+mmss(fet) : 'Descans saltat');
   }
-};
+}
+$('skipBtn').onclick = doSkip;
+$('skipNow').onclick = doSkip;
 $('tema').oninput = function(){ S.tema = this.value.trim(); };
 
 $('recAdd').onclick = function(){
@@ -955,6 +1075,7 @@ document.addEventListener('click', function(e){
 $('syncBtn').onclick = function(){ flush().then(pull); };
 $('csvBtn').onclick = csv;
 
+$('pipBtn').onclick = openPip;
 $('openSettings').onclick = function(){
   $('setName').value = settings.name; $('setPin').value = settings.pin;
   $('setUrl').value = settings.url; $('setSound').checked = settings.sound;
@@ -1003,6 +1124,7 @@ if (diedRunning && S.beat){
   save(K.live, S);
 }
 $('tema').value = S.tema || '';
+if ('documentPictureInPicture' in window) $('pipBtn').classList.remove('hidden');
 render();
 if (S.gap) setTimeout(askGap, 400);
 renderLog();

@@ -1,0 +1,16 @@
+{
+  "name": "Enfoc — pomodoro i registre d'estudi",
+  "short_name": "Enfoc",
+  "description": "Temporitzador pomodoro amb registre del temps d'estudi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#141d27",
+  "theme_color": "#141d27",
+  "lang": "ca",
+  "icons": [
+    { "src": "icona.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icona-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
