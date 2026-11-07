@@ -156,6 +156,7 @@ nav button[aria-current="true"]{background:var(--surface-2);color:var(--text)}
 .callegend{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12.5px;color:var(--muted)}
 .callegend i{width:14px;height:14px;border-radius:5px;background:color-mix(in srgb,var(--focus) 22%,var(--surface));display:block;flex:none}
 .rec .mid .note{white-space:normal;color:#8ea0ad;margin-top:3px;font-size:12.5px;line-height:1.4}
+.gapflag{color:var(--extra);cursor:help;font-size:12px}
 .field textarea{
   width:100%;background:var(--surface-2);border:1px solid var(--line);
   border-radius:10px;padding:12px;color:var(--text);resize:vertical;min-height:74px;font:inherit;
@@ -426,6 +427,34 @@ function hores(s){
 function pad(n){ return (n<10?'0':'')+n; }
 function isoDay(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
 function hhmm(d){ return pad(d.getHours())+':'+pad(d.getMinutes()); }
+
+/* ============ temps real vs. temps útil a l'historial ============ */
+var GAP_HIST = 5*3600;   // diferència a partir de la qual sospitem una desconnexió
+function hmToSecs(hm){
+  var p = String(hm).split(':');
+  return (+p[0])*3600 + (+p[1])*60;
+}
+function secsToHm(s){
+  s = ((Math.round(s) % 86400) + 86400) % 86400;
+  return pad(Math.floor(s/3600)) + ':' + pad(Math.floor((s%3600)/60));
+}
+// Temps real = diferència de rellotge entre l'inici i el final de la sessió
+// (inclou pauses i qualsevol tall descartat). Si el final és anterior a
+// l'inici, assumim que ha creuat la mitjanit.
+function tempsReal(r){
+  var real = hmToSecs(r.fi) - hmToSecs(r.inici);
+  if (real < 0) real += 86400;
+  return real;
+}
+// Quan el real supera molt el comptat (focus+descans), el més probable és
+// que hi hagi hagut una desconnexió sense comptar. En aquest cas, l'hora de
+// final que es mostra no ha de ser la del clic a Stop, sinó l'últim moment
+// en què l'app encara comptava temps útil.
+function finsMostrat(r){
+  var gap = tempsReal(r) - r.total;
+  if (gap > GAP_HIST) return secsToHm(hmToSecs(r.inici) + r.total);
+  return r.fi;
+}
 
 /* ============ so ============ */
 var ctx = null;
@@ -897,8 +926,13 @@ function esc(s){
 }
 function recRow(r){
   var tema = r.tema ? esc(r.tema) : 'Sense tema';
-  return '<div class="rec"><div class="hour">'+r.inici+' – '+r.fi+'</div>' +
-    '<div class="mid"><b>'+mins(r.util)+' útils</b><small>'+tema+' · '+mins(r.descans)+' de descans</small>' +
+  var real = tempsReal(r);
+  var fins = finsMostrat(r);
+  var tall = (real - r.total) > GAP_HIST;
+  return '<div class="rec"><div class="hour">'+r.inici+' – '+fins +
+    (tall ? ' <span class="gapflag" title="Hi ha més de 5 h de diferència entre el temps real i l’útil: probablement una desconnexió. L’hora de final mostrada és el darrer moment comptat, no la de prémer Stop.">⚠</span>' : '') +
+    '</div>' +
+    '<div class="mid"><b>'+mins(r.util)+' útils</b><small>'+tema+' · '+mins(r.descans)+' de descans · '+hores(real)+' reals</small>' +
     (r.notes ? '<small class="note">'+esc(r.notes)+'</small>' : '') + '</div>' +
     '<span class="pill">'+r.pomos+' pom</span>' +
     '<button class="del" data-del="'+r.id+'" aria-label="Esborra">' +
