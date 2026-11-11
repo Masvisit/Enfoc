@@ -289,8 +289,12 @@ details.a-card summary{cursor:pointer;font-weight:600;font-size:15px}
   .a-card.full{grid-column:1/-1}
 }
 @media (max-width:560px){
-  nav button{padding:7px 10px}
+  nav button{padding:7px 10px;font-size:13px}
   .hbar{gap:10px}
+}
+@media (max-width:420px){
+  nav button{padding:6px 8px;font-size:12.5px}
+  nav{gap:1px}
 }
 
 .a-hb{display:grid;grid-template-columns:minmax(70px,30%) 1fr auto;gap:10px;align-items:center;font-size:13px;margin:8px 0}
@@ -298,6 +302,66 @@ details.a-card summary{cursor:pointer;font-weight:600;font-size:15px}
 .a-hb div{height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden}
 .a-hb i{display:block;height:100%;background:var(--focus);border-radius:4px}
 .a-hb b{font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ---------- pla d'estudi ---------- */
+.p-header{display:flex;align-items:center;justify-content:space-between;margin:18px 0 14px}
+.p-header h2{margin:0;font-size:20px;letter-spacing:-.02em}
+.p-edit-btn{font-size:18px;width:36px;height:36px;border-radius:10px;background:var(--surface);display:grid;place-items:center;color:var(--muted)}
+.p-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.p-kpi{background:var(--surface);border-radius:12px;padding:12px 14px}
+.p-kpi small{display:block;color:var(--muted);font-size:12px}
+.p-kpi b{display:block;font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.15;margin-top:2px;font-variant-numeric:tabular-nums}
+.p-kpi.ok b{color:var(--break)}
+.p-kpi.warn b{color:var(--extra)}
+.p-kpi.behind b{color:var(--danger)}
+.p-kpi.accent b{color:var(--focus)}
+.p-card{background:var(--surface);border-radius:var(--r);padding:16px;margin-bottom:12px;min-width:0}
+.p-card h3{margin:0 0 12px;font-size:15px;font-weight:600}
+.p-card details summary{cursor:pointer;font-weight:600;font-size:15px;margin-bottom:0}
+.p-card details[open] summary{margin-bottom:12px}
+.p-today-empty{color:var(--muted);font-size:14px;padding:8px 0}
+.p-task{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.p-task:last-child{border-bottom:0}
+.p-task input[type=checkbox]{flex:none;width:20px;height:20px;accent-color:var(--focus);margin-top:1px;cursor:pointer}
+.p-task label{flex:1;font-size:14.5px;line-height:1.4;cursor:pointer}
+.p-task label small{display:block;color:var(--muted);font-size:12px;margin-top:1px}
+.p-task.done label{text-decoration:line-through;opacity:.5}
+.p-bar{height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;margin:8px 0 4px}
+.p-bar i{display:block;height:100%;border-radius:4px;transition:width .3s ease}
+.p-bar i.lect{background:var(--focus)}
+.p-bar i.apunts{background:var(--break)}
+.p-bar i.tests{background:var(--extra)}
+.p-bar i.fitxes{background:#a78bfa}
+.p-pleg{display:flex;align-items:baseline;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:2px}
+.p-pleg b{color:var(--text);font-variant-numeric:tabular-nums}
+.p-tema{padding:10px 0;border-bottom:1px solid var(--line)}
+.p-tema:last-child{border-bottom:0}
+.p-tema-head{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.p-tema-head .tid{font-size:12px;font-weight:700;color:var(--muted);min-width:28px}
+.p-tema-head .tnom{font-size:14px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p-tema-head .tpag{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.p-phases{display:flex;gap:6px;flex-wrap:wrap}
+.p-ph{display:flex;align-items:center;gap:4px;font-size:12px;padding:4px 8px;border-radius:8px;background:var(--surface-2);cursor:pointer;user-select:none}
+.p-ph.on{background:color-mix(in srgb,var(--focus) 25%,var(--surface));color:var(--focus)}
+.p-ph svg{width:13px;height:13px;flex:none}
+.p-week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.p-wday{text-align:center}
+.p-wday .lbl{font-size:11px;color:var(--muted);margin-bottom:4px}
+.p-wday .box{aspect-ratio:1;border-radius:8px;background:var(--surface-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-variant-numeric:tabular-nums}
+.p-wday .box.today{box-shadow:inset 0 0 0 1.5px var(--focus)}
+.p-wday .box.free{border:1px dashed var(--line)}
+.p-wday .box em{font-style:normal;font-size:10px;color:var(--focus);font-weight:600}
+.p-wday .box .done-mark{color:var(--break);font-size:14px;font-weight:700}
+.p-dow-pick{display:flex;gap:6px;flex-wrap:wrap}
+.p-dow-pick button{padding:8px 13px;border-radius:8px;font-size:14px;background:var(--surface-2);color:var(--muted)}
+.p-dow-pick button.on{background:color-mix(in srgb,var(--focus) 30%,var(--surface));color:var(--focus);font-weight:600}
+.p-legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:10px}
+.p-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+@media (max-width:420px){
+  .p-kpis{grid-template-columns:1fr 1fr}
+  .p-week{gap:4px}
+  .p-wday .lbl{font-size:10px}
+}
 </style>
 </head>
 <body data-phase="idle">
@@ -309,6 +373,7 @@ details.a-card summary{cursor:pointer;font-weight:600;font-size:15px}
       <button id="navTimer" aria-current="true">Temps</button>
       <button id="navLog">Registre</button>
       <button id="navStats">Anàlisi</button>
+      <button id="navPlan">Pla</button>
     </nav>
     <button class="icon-btn hidden" id="pipBtn" aria-label="Finestra flotant" title="Finestra flotant sempre al damunt">
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><rect x="12" y="11" width="8" height="6" rx="1" fill="currentColor"/></svg>
@@ -497,6 +562,75 @@ details.a-card summary{cursor:pointer;font-weight:600;font-size:15px}
   <div id="statsBody"></div>
   <div style="height:56px"></div>
 </main>
+
+<!-- ================= PLA D'ESTUDI ================= -->
+<main id="viewPlan" class="wrap hidden">
+  <div class="p-header">
+    <h2>Pla d'estudi</h2>
+    <button class="p-edit-btn" id="planEditBtn" aria-label="Editar pla">⚙</button>
+  </div>
+
+  <div class="p-kpis" id="planKpis"></div>
+
+  <div class="p-card" id="planToday"></div>
+
+  <div class="p-card">
+    <h3>Progrés del temari</h3>
+    <div class="p-progress" id="planProgress"></div>
+  </div>
+
+  <div class="p-card">
+    <h3>Setmana</h3>
+    <div id="planWeek"></div>
+  </div>
+
+  <div class="p-card">
+    <details open>
+      <summary>Temari genèric</summary>
+      <div id="planGeneric"></div>
+    </details>
+  </div>
+  <div class="p-card">
+    <details open>
+      <summary>Temari específic</summary>
+      <div id="planSpecific"></div>
+    </details>
+  </div>
+
+  <div style="height:56px"></div>
+</main>
+
+<!-- ================= DIÀLEG EDITAR PLA ================= -->
+<dialog id="dlgPlan">
+  <div class="sheet">
+    <h2>Configuració del pla</h2>
+    <p class="sub">Ajusta les dates i hores disponibles</p>
+    <div class="field">
+      <label for="planExam">Data objectiu (examen)</label>
+      <input id="planExam" type="date">
+    </div>
+    <div class="field">
+      <label for="planHWork">Hores d'estudi els dies de feina</label>
+      <input id="planHWork" type="number" min="0" max="12" step="0.5" value="3">
+    </div>
+    <div class="field">
+      <label for="planHFree">Hores d'estudi els dies lliures</label>
+      <input id="planHFree" type="number" min="0" max="14" step="0.5" value="6">
+    </div>
+    <div class="field">
+      <label>Dies lliures (no treballes)</label>
+      <div class="p-dow-pick" id="planDowPick"></div>
+    </div>
+    <div class="field">
+      <label for="planPsico">Minuts de psicotècnics diaris</label>
+      <input id="planPsico" type="number" min="0" max="120" step="5" value="15">
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="planSaveCfg" style="flex:1">Desa</button>
+      <button class="btn ghost" id="planCancelCfg">Cancel·la</button>
+    </div>
+  </div>
+</dialog>
 
 <div id="tip" aria-hidden="true"></div>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -1877,16 +2011,20 @@ document.addEventListener('scroll', function(){ tipEl.classList.remove('on'); },
 $('navTimer').onclick = function(){ showView('timer'); };
 $('navStats').onclick = function(){ showView('stats'); };
 $('navLog').onclick = function(){ showView('log'); };
+$('navPlan').onclick = function(){ showView('plan'); };
 function showView(v){
   $('viewTimer').classList.toggle('hidden', v!=='timer');
   $('viewLog').classList.toggle('hidden', v!=='log');
   $('viewStats').classList.toggle('hidden', v!=='stats');
+  $('viewPlan').classList.toggle('hidden', v!=='plan');
   document.body.classList.toggle('wide', v==='stats');
   $('navTimer').setAttribute('aria-current', v==='timer');
   $('navLog').setAttribute('aria-current', v==='log');
   $('navStats').setAttribute('aria-current', v==='stats');
+  $('navPlan').setAttribute('aria-current', v==='plan');
   if (v==='log'){ renderLog(); flush(true); }
   if (v==='stats'){ renderStats(); }
+  if (v==='plan'){ renderPlan(); }
   window.scrollTo(0,0);
 }
 $('segList').onclick = function(){ segTo('list'); };
@@ -1951,6 +2089,386 @@ document.addEventListener('keydown', function(e){
   if (e.target.tagName === 'INPUT' || document.querySelector('dialog[open]')) return;
   if (e.code === 'Space'){ e.preventDefault(); $('playBtn').click(); }
 });
+
+/* ============ pla d'estudi ============ */
+var TEMARI = [
+  {id:'G1',nom:'Constitució, Estatut i organització territorial',pags:30,grup:'G'},
+  {id:'G2',nom:'Administració pública catalana',pags:25,grup:'G'},
+  {id:'G3',nom:'Procediment administratiu i potestat sancionadora',pags:25,grup:'G'},
+  {id:'G4',nom:'Ocupació pública i igualtat',pags:20,grup:'G'},
+  {id:'E1',nom:'Cos d\'Agents Rurals: organització i funcions',pags:30,grup:'E'},
+  {id:'E2',nom:'Policia judicial i delictes mediambientals',pags:14,grup:'E'},
+  {id:'E3',nom:'Activitat cinegètica',pags:24,grup:'E'},
+  {id:'E4',nom:'Regulació d\'armes',pags:20,grup:'E'},
+  {id:'E5',nom:'Pesca esportiva continental',pags:22,grup:'E'},
+  {id:'E6',nom:'Animals de companyia',pags:22,grup:'E'},
+  {id:'E7',nom:'Fauna salvatge autòctona',pags:26,grup:'E'},
+  {id:'E8',nom:'Espècies exòtiques invasores',pags:18,grup:'E'},
+  {id:'E9',nom:'Prevenció d\'incendis forestals',pags:28,grup:'E'},
+  {id:'E10',nom:'Extinció d\'incendis i emergències',pags:24,grup:'E'},
+  {id:'E11',nom:'Protecció i gestió forestal',pags:26,grup:'E'},
+  {id:'E12',nom:'Flora protegida',pags:20,grup:'E'},
+  {id:'E13',nom:'Patrimoni natural i biodiversitat',pags:24,grup:'E'},
+  {id:'E14',nom:'Espais naturals protegits i Natura 2000',pags:28,grup:'E'},
+  {id:'E15',nom:'Ús recreatiu del medi natural',pags:20,grup:'E'},
+  {id:'E16',nom:'Urbanisme en sòl no urbanitzable',pags:22,grup:'E'},
+  {id:'E17',nom:'Domini públic hidràulic',pags:24,grup:'E'},
+  {id:'E18',nom:'Residus i activitats extractives',pags:22,grup:'E'},
+  {id:'E19',nom:'Protecció civil: PROCICAT',pags:24,grup:'E'},
+  {id:'E20',nom:'Geografia física i política de Catalunya',pags:22,grup:'E'},
+  {id:'E21',nom:'Cartografia, orientació i meteorologia',pags:20,grup:'E'}
+];
+var PL_PH = ['lectura','apunts','test','fitxes','repas'];
+var PH_LABEL = {lectura:'Lectura',apunts:'Apunts',test:'Test',fitxes:'Fitxes',repas:'Repàs'};
+var PH_COLOR = {lectura:'var(--focus)',apunts:'var(--break)',test:'var(--extra)',fitxes:'#a78bfa',repas:'#6bb8e0'};
+var DOW_NAMES = ['dg','dl','dt','dc','dj','dv','ds'];
+var DOW_FULL = ['Diumenge','Dilluns','Dimarts','Dimecres','Dijous','Divendres','Dissabte'];
+
+var planK = 'enfoc.plan';
+var plan = load(planK, null);
+if (!plan) {
+  plan = {
+    examDate:'2027-04-01',
+    hoursWork:3, hoursFree:6, psico:15,
+    freeDays:[2,3],
+    done:{},
+    checks:{},
+    pags:{}
+  };
+  /* pre-fill known state */
+  var pre = {
+    /* Genèric: lectura+apunts tot completat */
+    'G1-lectura':1,'G1-apunts':1,
+    'G2-lectura':1,'G2-apunts':1,
+    'G3-lectura':1,'G3-apunts':1,
+    'G4-lectura':1,'G4-apunts':1,
+    /* Genèric: tests fets (pipeline mini-test) */
+    'G3-test':1,'G4-test':1,
+    /* Genèric: fitxes — només G1 */
+    'G1-fitxes':1,
+    /* Específic: lectura+apunts E1 i E2 */
+    'E1-lectura':1,'E1-apunts':1,
+    'E2-lectura':1,'E2-apunts':1,
+    /* Específic: tests fets (pipeline) */
+    'E1-test':1,'E2-test':1
+  };
+  plan.done = pre;
+  savePlan();
+}
+function savePlan(){ save(planK, plan); }
+function tPags(t){ return plan.pags[t.id] || t.pags; }
+
+function planDaysLeft(){
+  var ex = new Date(plan.examDate+'T00:00:00');
+  var now = new Date(); now.setHours(0,0,0,0);
+  return Math.max(0, Math.ceil((ex - now) / 86400000));
+}
+function planStudyDays(){
+  /* count study days from today to exam */
+  var ex = new Date(plan.examDate+'T00:00:00');
+  var d = new Date(); d.setHours(0,0,0,0);
+  var n = 0;
+  while (d <= ex){ n++; d.setDate(d.getDate()+1); }
+  return n;
+}
+function planTotalPags(){
+  var t = 0; TEMARI.forEach(function(x){ t += tPags(x); }); return t;
+}
+function planDonePags(){
+  /* only count lectura phase for pages read */
+  var t = 0;
+  TEMARI.forEach(function(x){ if (plan.done[x.id+'-lectura']) t += tPags(x); });
+  return t;
+}
+function planPhaseCount(phase){
+  var done = 0;
+  TEMARI.forEach(function(x){ if (plan.done[x.id+'-'+phase]) done++; });
+  return done;
+}
+function planOverallPct(){
+  var total = TEMARI.length * PL_PH.length;
+  var done = 0;
+  TEMARI.forEach(function(x){ PL_PH.forEach(function(p){ if (plan.done[x.id+'-'+p]) done++; }); });
+  return total ? Math.round(done/total*100) : 0;
+}
+
+function todayStr(){
+  var d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function isFreeDay(date){
+  return plan.freeDays.indexOf(date.getDay()) >= 0;
+}
+
+function planSuggestToday(){
+  var tasks = [];
+  var today = todayStr();
+  var checked = plan.checks[today] || [];
+  var free = isFreeDay(new Date());
+  var budget = free ? plan.hoursFree : plan.hoursWork;
+
+  /* 1. Next lectura tema */
+  var nextLect = null;
+  for (var i = 0; i < TEMARI.length; i++){
+    if (!plan.done[TEMARI[i].id+'-lectura']){ nextLect = TEMARI[i]; break; }
+  }
+  if (nextLect){
+    var mins = Math.round(tPags(nextLect) * 3);
+    tasks.push({
+      key: nextLect.id+'-lectura',
+      label: 'Lectura: '+nextLect.id+' — '+nextLect.nom,
+      sub: tPags(nextLect)+' pàg. (~'+mins+' min)',
+      done: checked.indexOf(nextLect.id+'-lectura') >= 0
+    });
+  }
+
+  /* 2. Next apunts tema (behind lectura) */
+  var nextApunts = null;
+  for (var i = 0; i < TEMARI.length; i++){
+    if (!plan.done[TEMARI[i].id+'-apunts']){ nextApunts = TEMARI[i]; break; }
+  }
+  if (nextApunts && (!nextLect || nextApunts.id !== nextLect.id)){
+    tasks.push({
+      key: nextApunts.id+'-apunts',
+      label: 'Apunts: '+nextApunts.id+' — '+nextApunts.nom,
+      sub: 'Preparar apunts i resum',
+      done: checked.indexOf(nextApunts.id+'-apunts') >= 0
+    });
+  }
+
+  /* 3. Next test */
+  var nextTest = null;
+  for (var i = 0; i < TEMARI.length; i++){
+    if (plan.done[TEMARI[i].id+'-apunts'] && !plan.done[TEMARI[i].id+'-test']){ nextTest = TEMARI[i]; break; }
+  }
+  if (nextTest){
+    tasks.push({
+      key: nextTest.id+'-test',
+      label: 'Test: '+nextTest.id+' — '+nextTest.nom,
+      sub: 'Fer el test de pràctica',
+      done: checked.indexOf(nextTest.id+'-test') >= 0
+    });
+  }
+
+  /* 4. Next fitxes */
+  var nextFit = null;
+  for (var i = 0; i < TEMARI.length; i++){
+    if (plan.done[TEMARI[i].id+'-test'] && !plan.done[TEMARI[i].id+'-fitxes']){ nextFit = TEMARI[i]; break; }
+  }
+  if (nextFit){
+    tasks.push({
+      key: nextFit.id+'-fitxes',
+      label: 'Fitxes: '+nextFit.id+' — '+nextFit.nom,
+      sub: 'Crear fitxes de repàs',
+      done: checked.indexOf(nextFit.id+'-fitxes') >= 0
+    });
+  }
+
+  /* 5. Next repas */
+  var nextRep = null;
+  for (var i = 0; i < TEMARI.length; i++){
+    if (plan.done[TEMARI[i].id+'-fitxes'] && !plan.done[TEMARI[i].id+'-repas']){ nextRep = TEMARI[i]; break; }
+  }
+  if (nextRep){
+    tasks.push({
+      key: nextRep.id+'-repas',
+      label: 'Repàs: '+nextRep.id+' — '+nextRep.nom,
+      sub: 'Repassar fitxes i apunts',
+      done: checked.indexOf(nextRep.id+'-repas') >= 0
+    });
+  }
+
+  /* 6. Psicotècnics */
+  if (plan.psico > 0){
+    tasks.push({
+      key: 'psico',
+      label: plan.psico+' min de psicotècnics',
+      sub: 'Aptitud, raonament i càlcul',
+      done: checked.indexOf('psico') >= 0
+    });
+  }
+
+  /* Limit tasks based on day type */
+  var maxTasks = free ? 6 : 4;
+  return tasks.slice(0, maxTasks);
+}
+
+function renderPlan(){
+  var daysLeft = planDaysLeft();
+  var totalPags = planTotalPags();
+  var donePags = planDonePags();
+  var remaining = totalPags - donePags;
+  var studyDays = planStudyDays();
+  var pctOverall = planOverallPct();
+  var pagsPerDay = studyDays > 0 ? (remaining / studyDays).toFixed(1) : '—';
+
+  /* from enfoc records: study days last 14 days for pace */
+  var today = new Date(); today.setHours(0,0,0,0);
+  var ago14 = new Date(today); ago14.setDate(ago14.getDate()-14);
+  var studiedDays14 = {};
+  records.forEach(function(r){
+    var rd = new Date(r.data+'T00:00:00');
+    if (rd >= ago14 && rd <= today) studiedDays14[r.data] = 1;
+  });
+  var daysStudied = Object.keys(studiedDays14).length;
+  var avgHoursDay = 0;
+  if (daysStudied > 0){
+    var totUtil14 = 0;
+    records.forEach(function(r){
+      var rd = new Date(r.data+'T00:00:00');
+      if (rd >= ago14 && rd <= today) totUtil14 += r.util;
+    });
+    avgHoursDay = (totUtil14 / daysStudied / 3600).toFixed(1);
+  }
+
+  /* KPIs */
+  var kH = '';
+  kH += '<div class="p-kpi accent"><b>'+daysLeft+'</b><small>Dies fins l\'examen</small></div>';
+  kH += '<div class="p-kpi'+(pctOverall>=50?' ok':pctOverall>=25?' warn':' behind')+'"><b>'+pctOverall+'%</b><small>Temari completat</small></div>';
+  kH += '<div class="p-kpi"><b>'+remaining+'</b><small>Pàgines per llegir</small></div>';
+  kH += '<div class="p-kpi'+(Number(pagsPerDay)<=5?' ok':Number(pagsPerDay)<=10?' warn':' behind')+'"><b>'+pagsPerDay+'</b><small>Pàg./dia necessàries</small></div>';
+  $('planKpis').innerHTML = kH;
+
+  /* Today's tasks */
+  var tasks = planSuggestToday();
+  var todayDate = new Date();
+  var tH = '<h3>Avui — '+DOW_FULL[todayDate.getDay()]+' '+todayDate.getDate()+'/'+(todayDate.getMonth()+1);
+  tH += (isFreeDay(todayDate) ? ' <span style="color:var(--break);font-size:13px;font-weight:400">(dia lliure)</span>' : ' <span style="color:var(--muted);font-size:13px;font-weight:400">(feina a les 18h)</span>');
+  tH += '</h3>';
+  if (tasks.length === 0){
+    tH += '<p class="p-today-empty">Tot al dia! 🎉</p>';
+  } else {
+    tasks.forEach(function(t){
+      tH += '<div class="p-task'+(t.done?' done':'')+'">';
+      tH += '<input type="checkbox" data-check="'+t.key+'"'+(t.done?' checked':'')+'>';
+      tH += '<label data-check-label="'+t.key+'">'+t.label+'<small>'+t.sub+'</small></label>';
+      tH += '</div>';
+    });
+  }
+  if (daysStudied > 0){
+    tH += '<div style="margin-top:12px;font-size:12.5px;color:var(--muted)">Últims 14 dies: '+daysStudied+' dies estudiant, mitjana '+avgHoursDay+' h/dia</div>';
+  }
+  $('planToday').innerHTML = tH;
+
+  /* Progress bars */
+  var pH = '';
+  PL_PH.forEach(function(p){
+    var done = planPhaseCount(p);
+    var pct = Math.round(done / TEMARI.length * 100);
+    pH += '<div class="p-pleg"><span>'+PH_LABEL[p]+'</span><b>'+done+'/'+TEMARI.length+'</b></div>';
+    pH += '<div class="p-bar"><i style="width:'+pct+'%;background:'+PH_COLOR[p]+'" class="'+p+'"></i></div>';
+  });
+  pH += '<div class="p-legend">';
+  PL_PH.forEach(function(p){
+    pH += '<span><i style="background:'+PH_COLOR[p]+'"></i>'+PH_LABEL[p]+'</span>';
+  });
+  pH += '</div>';
+  $('planProgress').innerHTML = pH;
+
+  /* Week view */
+  var wH = '<div class="p-week">';
+  var mon = new Date(todayDate);
+  mon.setDate(mon.getDate() - ((mon.getDay()+6)%7));
+  for (var d = 0; d < 7; d++){
+    var wd = new Date(mon);
+    wd.setDate(mon.getDate() + d);
+    var ds = wd.getFullYear()+'-'+String(wd.getMonth()+1).padStart(2,'0')+'-'+String(wd.getDate()).padStart(2,'0');
+    var isToday = ds === todayStr();
+    var free = isFreeDay(wd);
+    var dayChecks = plan.checks[ds] || [];
+    var allDone = dayChecks.length >= 3;
+    wH += '<div class="p-wday"><div class="lbl">'+DOW_NAMES[(d+1)%7]+'</div>';
+    wH += '<div class="box'+(isToday?' today':'')+(free?' free':'')+'">';
+    wH += wd.getDate();
+    if (dayChecks.length > 0) wH += '<em>'+dayChecks.length+'✓</em>';
+    wH += '</div></div>';
+  }
+  wH += '</div>';
+  $('planWeek').innerHTML = wH;
+
+  /* Temari lists */
+  renderTemariGroup('planGeneric', 'G');
+  renderTemariGroup('planSpecific', 'E');
+}
+
+function renderTemariGroup(elId, grup){
+  var h = '';
+  TEMARI.forEach(function(t){
+    if (t.grup !== grup) return;
+    h += '<div class="p-tema">';
+    h += '<div class="p-tema-head"><span class="tid">'+t.id+'</span><span class="tnom">'+t.nom+'</span><span class="tpag">'+tPags(t)+' p.</span></div>';
+    h += '<div class="p-phases">';
+    PL_PH.forEach(function(p){
+      var key = t.id+'-'+p;
+      var on = plan.done[key];
+      h += '<span class="p-ph'+(on?' on':'')+'" data-toggle="'+key+'">';
+      if (on) h += '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 4.5l-7 7L3 8"/></svg>';
+      else h += '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.5"/></svg>';
+      h += PH_LABEL[p]+'</span>';
+    });
+    h += '</div></div>';
+  });
+  $(elId).innerHTML = h;
+}
+
+/* clicks on phase toggles */
+document.addEventListener('click', function(e){
+  var ph = e.target.closest('[data-toggle]');
+  if (ph){
+    var key = ph.dataset.toggle;
+    plan.done[key] = !plan.done[key];
+    savePlan();
+    renderPlan();
+    return;
+  }
+});
+/* clicks on today checkboxes */
+document.addEventListener('change', function(e){
+  var cb = e.target.closest('[data-check]');
+  if (cb){
+    var key = cb.dataset.check;
+    var today = todayStr();
+    if (!plan.checks[today]) plan.checks[today] = [];
+    var idx = plan.checks[today].indexOf(key);
+    if (cb.checked && idx < 0) plan.checks[today].push(key);
+    if (!cb.checked && idx >= 0) plan.checks[today].splice(idx, 1);
+    savePlan();
+    renderPlan();
+  }
+});
+
+/* Plan settings dialog */
+$('planEditBtn').onclick = function(){
+  $('planExam').value = plan.examDate;
+  $('planHWork').value = plan.hoursWork;
+  $('planHFree').value = plan.hoursFree;
+  $('planPsico').value = plan.psico;
+  var dowH = '';
+  DOW_FULL.forEach(function(name, i){
+    dowH += '<button data-dow="'+i+'" class="'+(plan.freeDays.indexOf(i)>=0?'on':'')+'">'+DOW_NAMES[i]+'</button>';
+  });
+  $('planDowPick').innerHTML = dowH;
+  $('dlgPlan').showModal();
+};
+$('planDowPick').addEventListener('click', function(e){
+  var b = e.target.closest('[data-dow]');
+  if (!b) return;
+  b.classList.toggle('on');
+});
+$('planSaveCfg').onclick = function(){
+  plan.examDate = $('planExam').value || '2027-04-01';
+  plan.hoursWork = parseFloat($('planHWork').value) || 3;
+  plan.hoursFree = parseFloat($('planHFree').value) || 6;
+  plan.psico = parseInt($('planPsico').value) || 15;
+  plan.freeDays = [];
+  $('planDowPick').querySelectorAll('.on').forEach(function(b){
+    plan.freeDays.push(parseInt(b.dataset.dow));
+  });
+  savePlan();
+  $('dlgPlan').close();
+  renderPlan();
+};
+$('planCancelCfg').onclick = function(){ $('dlgPlan').close(); };
 
 /* ============ arrencada ============ */
 /* La sessió es recupera sempre en pausa. Si el comptador corria quan la
