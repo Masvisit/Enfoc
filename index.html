@@ -499,11 +499,15 @@ function secsToHm(s){
   return pad(Math.floor(s/3600)) + ':' + pad(Math.floor((s%3600)/60));
 }
 // Temps real = diferència de rellotge entre l'inici i el final de la sessió
-// (inclou pauses i qualsevol tall descartat). Si el final és anterior a
-// l'inici, assumim que ha creuat la mitjanit.
+// (inclou pauses i qualsevol tall descartat). Només es guarda l'hora (HH:MM),
+// així que si el final és anterior a l'inici o el comptat supera el rellotge,
+// la sessió va quedar oberta com a mínim fins l'endemà: se li sumen dies sencers.
+var HM = /^\d{1,2}:\d{2}$/;
 function tempsReal(r){
+  if (!HM.test(r.inici) || !HM.test(r.fi)) return r.total;      // dada il·legible: no inventem res
   var real = hmToSecs(r.fi) - hmToSecs(r.inici);
   if (real < 0) real += 86400;
+  if (r.total - real > 300) real += Math.ceil((r.total - real)/86400) * 86400;
   return real;
 }
 // Quan el real supera molt el comptat (focus+descans), el més probable és
@@ -511,9 +515,32 @@ function tempsReal(r){
 // final que es mostra no ha de ser la del clic a Stop, sinó l'últim moment
 // en què l'app encara comptava temps útil.
 function finsMostrat(r){
+  if (!HM.test(r.inici) || !HM.test(r.fi)) return r.fi;
   var gap = tempsReal(r) - r.total;
   if (gap > GAP_HIST) return secsToHm(hmToSecs(r.inici) + r.total);
   return r.fi;
+}
+
+// Repara registres que han passat per Google Sheets, que converteix les
+// cadenes "2026-09-10" i "16:35" en data/hora i les torna com a ISO
+// ("2026-09-09T22:00:00.000Z", "1899-12-30T16:49:44.000Z").
+function normalitzaRegistre(r){
+  var iso = /^\d{4}-\d{2}-\d{2}T/;
+  var canvi = false, o = r;
+  ['data','inici','fi'].forEach(function(k){
+    if (typeof o[k] === 'string' && iso.test(o[k])){
+      var d = new Date(o[k]);
+      if (isNaN(d)) return;
+      if (!canvi){ o = Object.assign({}, r); canvi = true; }
+      o[k] = (k === 'data') ? isoDay(d) : hhmm(d);
+    }
+  });
+  return o;
+}
+function normalitzaTots(llista){
+  var tocat = false;
+  var out = llista.map(function(r){ var n = normalitzaRegistre(r); if (n !== r) tocat = true; return n; });
+  return {llista: out, tocat: tocat};
 }
 
 /* ============ so ============ */
@@ -1009,7 +1036,7 @@ function pull(){
     .then(function(res){
       if (!res || !res.ok) throw new Error();
       var seen = {}; records.forEach(function(r){ seen[r.id] = true; });
-      var add = (res.records||[]).filter(function(r){ return !seen[r.id]; });
+      var add = normalitzaTots(res.records||[]).llista.filter(function(r){ return !seen[r.id]; });
       records = records.concat(add);
       records.sort(function(a,b){ return (b.data+b.inici).localeCompare(a.data+a.inici); });
       save(K.rec, records);
@@ -1295,6 +1322,8 @@ document.addEventListener('keydown', function(e){
    pàgina va morir, mirem quant fa de l'últim senyal de vida. */
 var diedRunning = S.active && S.running;
 if (S.active){ S.running = false; }
+var fix = normalitzaTots(records);
+if (fix.tocat){ records = fix.llista; save(K.rec, records); }
 var orphan = S.active && ((Date.now() - lastUseful())/1000 > ORPHAN_AFTER);
 if (!orphan && diedRunning && S.beat){
   var away = (Date.now() - S.beat)/1000;
