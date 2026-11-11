@@ -128,7 +128,13 @@ nav button[aria-current="true"]{background:var(--surface-2);color:var(--text)}
 .dayhead h3{margin:0;font-size:15px;font-weight:600;text-transform:none}
 .dayhead span{font-size:14px;color:var(--focus);font-variant-numeric:tabular-nums}
 .rec{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
-.rec .hour{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;width:82px;flex:none}
+.rec .hour{font-size:14px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;margin-bottom:7px}
+.rec .stats{display:flex;flex-wrap:wrap;gap:6px 22px;margin-bottom:6px}
+.rec .stats span{display:block}
+.rec .stats small{display:block;overflow:visible;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.rec .stats b{font-size:16px}
+.rec .stats .u b{color:var(--focus)}
+.rec .mid .meta{white-space:normal;line-height:1.4}
 .rec .mid{flex:1;min-width:0}
 .rec .mid b{display:block;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
 .rec .mid small{color:var(--muted);font-size:12.5px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -191,9 +197,26 @@ dialog::backdrop{background:rgba(10,14,19,.7)}
 }
 .field.row{display:flex;align-items:center;justify-content:space-between;gap:14px}
 .recap{background:var(--surface-2);border-radius:var(--r);padding:14px;margin-bottom:18px}
-.recap div{display:flex;justify-content:space-between;padding:5px 0;font-size:15px}
-.recap div span{color:var(--muted)}
-.recap div b{font-variant-numeric:tabular-nums}
+.recap .rlist > div{display:flex;justify-content:space-between;padding:5px 0;font-size:15px}
+.recap .rlist span{color:var(--muted)}
+.recap .rlist b{font-variant-numeric:tabular-nums}
+.recap .rhours{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;margin-bottom:12px;color:var(--muted)}
+.recap .rhours b{color:var(--text);font-size:17px}
+.recap .rbig{display:flex;gap:10px;margin-bottom:10px}
+.recap .rbig > div{flex:1;background:var(--surface);border-radius:12px;padding:11px 12px}
+.recap .rbig small{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.recap .rbig b{display:block;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2;margin-top:2px}
+.recap .rbig .u b{color:var(--focus)}
+.addbox{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.addlbl{display:block;font-size:13px;color:var(--muted);margin-bottom:9px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--surface);border-radius:999px;padding:9px 16px;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums;transition:background .15s ease}
+.chip:hover{background:var(--surface-2)}
+.chip:active{transform:scale(.97)}
+.addcustom{display:flex;gap:10px;margin-top:10px}
+.addcustom input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 14px;color:var(--text)}
+.addcustom .btn{padding:11px 18px;font-size:15px}
+.addhint{margin:9px 0 0;font-size:12px;color:#7b8b98}
 .sheet .controls{margin-top:0}
 .switch{position:relative;width:48px;height:28px;flex:none}
 .switch input{opacity:0;width:100%;height:100%;margin:0}
@@ -279,6 +302,22 @@ dialog::backdrop{background:rgba(10,14,19,.7)}
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
     </button>
   </div>
+
+  <div class="addbox" id="addBox">
+    <span class="addlbl">Has oblidat el play? Suma el temps estudiat</span>
+    <div class="chips">
+      <button class="chip" data-add="2">+2 min</button>
+      <button class="chip" data-add="5">+5 min</button>
+      <button class="chip" data-add="7">+7 min</button>
+      <button class="chip" data-add="10">+10 min</button>
+      <button class="chip" id="addOther" aria-expanded="false">Altre…</button>
+    </div>
+    <div class="addcustom hidden" id="addCustom">
+      <input id="addMin" type="text" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="minuts" aria-label="Minuts a sumar">
+      <button class="btn primary" id="addGo">Suma</button>
+    </div>
+    <p class="addhint">Es resten del compte enrere i se sumen al temps útil.</p>
+  </div>
 </main>
 
 <!-- ================= REGISTRE ================= -->
@@ -337,6 +376,19 @@ dialog::backdrop{background:rgba(10,14,19,.7)}
   </div>
 </dialog>
 
+<dialog id="dlgOrphan">
+  <div class="sheet">
+    <h2>Sessió sense tancar</h2>
+    <p class="sub" id="orphText"></p>
+    <div class="recap" id="orphRecap"></div>
+    <div class="controls">
+      <button class="btn ghost" id="orphDiscard">Descarta-la</button>
+      <button class="btn primary" id="orphSave">Desa-la</button>
+    </div>
+    <button class="btn wide hidden" id="orphKeep" style="margin-top:10px">Continua-la</button>
+  </div>
+</dialog>
+
 <dialog id="dlgRecover">
   <div class="sheet">
     <h2>El compte s'ha aturat</h2>
@@ -381,6 +433,8 @@ dialog::backdrop{background:rgba(10,14,19,.7)}
 var FOCUS = 25*60, BREAK = 5*60, LONG = 15*60, CYCLE = 4;
 var GAP_LIMIT = 10*60;   // salt dins la pàgina que ja no es dóna per estudiat
 var GRACE = 60;          // marge en recarregar: per sota, es compta sense preguntar
+var ORPHAN_AFTER = 60*60; // sessió activa sense cap senyal des de fa més d'això = sense tancar
+var ADD_MAX = 240*60;    // màxim de temps que es pot sumar d'un cop
 var K = {rec:'enfoc.records', set:'enfoc.settings', queue:'enfoc.queue', live:'enfoc.session'};
 var CIRC = 2*Math.PI*88;
 var MESOS = ['gener','febrer','març','abril','maig','juny','juliol','agost','setembre','octubre','novembre','desembre'];
@@ -401,7 +455,7 @@ var lastTick = Date.now();
 function newSession(){
   return {active:false, running:false, phase:'idle', started:null,
           phaseElapsed:0, focus:0, brk:0, extraFocus:0, extraBrk:0,
-          pomos:0, warned:false, tema:'', beat:null, gap:0};
+          pomos:0, warned:false, tema:'', beat:null, gap:0, stopAt:null};
 }
 
 function load(key, def){
@@ -423,6 +477,12 @@ function hores(s){
   var h = s/3600;
   if (h < 1) return Math.round(s/60)+' min';
   return (Math.round(h*10)/10).toString().replace('.',',')+' h';
+}
+// Durada exacta i llegible: "2 h 18 min", "45 min", "0 min".
+function durada(s){
+  var t = Math.max(0, Math.round(s/60)), h = Math.floor(t/60), m = t%60;
+  if (!h) return m+' min';
+  return h+' h'+(m ? ' '+m+' min' : '');
 }
 function pad(n){ return (n<10?'0':'')+n; }
 function isoDay(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
@@ -573,13 +633,39 @@ function start(){
     S.phase = 'focus'; S.phaseElapsed = 0;
     S.tema = $('tema').value.trim();
   }
+  S.stopAt = null;
   S.running = true;
   lastTick = S.beat = Date.now();
   keepAwake(true);
   render();
 }
 function pause(){
-  S.running = false; keepAwake(false); save(K.live, S); render();
+  S.running = false; S.beat = Date.now(); keepAwake(false); save(K.live, S); render();
+}
+
+/* Suma temps ja estudiat (per quan s'ha oblidat prémer play). Es resta del
+   compte enrere i es suma al temps útil. Si no hi ha sessió, la crea i fa
+   que l'hora d'inici sigui la real; si n'hi ha, la reprèn. */
+function addStudy(min){
+  var secs = Math.round(min*60);
+  if (!(secs > 0)){ toast('Escriu un nombre de minuts'); return false; }
+  if (secs > ADD_MAX){ toast('Màxim '+(ADD_MAX/60)+' min cada vegada'); return false; }
+  if (S.phase !== 'idle' && S.phase !== 'focus'){ return false; }
+  audio();
+  if (!S.active){
+    S = newSession();
+    S.active = true; S.started = Date.now() - secs*1000;
+    S.phase = 'focus'; S.phaseElapsed = 0;
+    S.tema = $('tema').value.trim();
+  }
+  applyTime(secs, true);
+  S.running = true;
+  lastTick = S.beat = Date.now();
+  keepAwake(true);
+  save(K.live, S);
+  render();
+  toast('+'+Math.round(secs/60)+' min sumats');
+  return true;
 }
 function toBreak(){
   S.phase = 'break'; S.phaseElapsed = 0; S.warned = false;
@@ -645,6 +731,9 @@ function render(){
   var p = S.phase, over = (p === 'focusOver' || p === 'breakOver');
   $('nextBox').classList.toggle('hidden', !over);
   $('mainControls').classList.toggle('hidden', over);
+  var canAdd = (p === 'idle' || p === 'focus');
+  $('addBox').classList.toggle('hidden', !canAdd);
+  if (!canAdd) $('addCustom').classList.add('hidden');
 
   if (over){
     if (p === 'focusOver'){
@@ -769,7 +858,7 @@ function pipPaint(){
 
   el.textContent = clockText();
   d.getElementById('pPhase').textContent = PHASES[p].label;
-  d.getElementById('pNote').textContent = noteText();
+  d.getElementById('pNote').textContent = $('dlgStop').open ? 'Resum pendent a l\u2019app' : noteText();
 
   var play = d.getElementById('pPlay');
   if (p === 'focusOver')      play.innerHTML = 'Descans';
@@ -805,6 +894,22 @@ function closeGap(secs){
   if (secs > 0) toast('Afegits ' + Math.round(secs/60) + ' min recuperats');
 }
 
+/* ============ sessió sense tancar ============ */
+// Últim moment en què l'app encara comptava temps (o, si no consta, inici + comptat).
+function lastUseful(){
+  return S.beat || (S.started + (S.focus + S.brk)*1000);
+}
+function askOrphan(){
+  if (!S.active || $('dlgOrphan').open) return;
+  var dia = dayLabel(isoDay(new Date(S.started)));
+  var avui = isoDay(new Date(S.started)) === isoDay(new Date());
+  $('orphText').textContent = dia + ': aquesta sessió es va quedar oberta sense prémer Stop. ' +
+    'Pots desar-la amb l\u2019hora de l\u2019últim moment comptat.';
+  $('orphRecap').innerHTML = recapHtml(S.started, lastUseful(), recap());
+  $('orphKeep').classList.toggle('hidden', !avui);
+  $('dlgOrphan').showModal();
+}
+
 /* ============ desar sessió ============ */
 function recap(){
   return {
@@ -816,21 +921,30 @@ function recap(){
     pomos: S.pomos
   };
 }
-function openStop(){
-  var r = recap();
-  $('stopRecap').innerHTML =
-    '<div><span>Temps total</span><b>'+mins(r.total)+'</b></div>' +
-    '<div><span>Temps útil</span><b>'+mins(r.util)+'</b></div>' +
-    '<div><span>Descans</span><b>'+mins(r.desc)+'</b></div>' +
-    '<div><span>Pomodoros</span><b>'+r.pomos+'</b></div>' +
-    (r.extraF > 30 ? '<div><span>Del qual, extra d\u2019estudi</span><b>'+mins(r.extraF)+'</b></div>' : '');
+// Resum visual: hores d'inici i final, després total i útil ben a la vista.
+function recapHtml(startTs, endTs, r){
+  return '<div class="rhours"><b>'+hhmm(new Date(startTs))+' – '+hhmm(new Date(endTs))+'</b></div>' +
+    '<div class="rbig">' +
+      '<div><small>Temps total</small><b>'+durada(r.total)+'</b></div>' +
+      '<div class="u"><small>Temps útil</small><b>'+durada(r.util)+'</b></div>' +
+    '</div>' +
+    '<div class="rlist">' +
+      '<div><span>Descans</span><b>'+durada(r.desc)+'</b></div>' +
+      '<div><span>Pomodoros</span><b>'+r.pomos+'</b></div>' +
+      (r.extraF > 30 ? '<div><span>Del qual, extra d’estudi</span><b>'+durada(r.extraF)+'</b></div>' : '') +
+    '</div>';
+}
+function openStop(at){
+  S.stopAt = at || Date.now();   // l'hora de final és la del clic a Stop, no la de Desa
+  $('stopRecap').innerHTML = recapHtml(S.started, S.stopAt, recap());
   S.running = false; keepAwake(false);
+  save(K.live, S);
   $('dlgStop').showModal();
   render();
 }
-function commit(keep){
+function commit(keep, endTs){
   if (keep && (S.focus + S.brk) > 30){
-    var end = new Date(), ini = new Date(S.started);
+    var end = new Date(endTs || Date.now()), ini = new Date(S.started);
     var rec = {
       id: 'e'+S.started+'-'+Math.random().toString(36).slice(2,7),
       data: isoDay(ini),
@@ -929,10 +1043,13 @@ function recRow(r){
   var real = tempsReal(r);
   var fins = finsMostrat(r);
   var tall = (real - r.total) > GAP_HIST;
-  return '<div class="rec"><div class="hour">'+r.inici+' – '+fins +
+  return '<div class="rec"><div class="mid">' +
+    '<div class="hour">'+r.inici+' – '+fins +
     (tall ? ' <span class="gapflag" title="Hi ha més de 5 h de diferència entre el temps real i l’útil: probablement una desconnexió. L’hora de final mostrada és el darrer moment comptat, no la de prémer Stop.">⚠</span>' : '') +
     '</div>' +
-    '<div class="mid"><b>'+mins(r.util)+' útils</b><small>'+tema+' · '+mins(r.descans)+' de descans · '+hores(real)+' reals</small>' +
+    '<div class="stats"><span><small>Total</small><b>'+durada(r.total)+'</b></span>' +
+    '<span class="u"><small>Útil</small><b>'+durada(r.util)+'</b></span></div>' +
+    '<small class="meta">'+tema+' · '+durada(r.descans)+' de descans · '+durada(real)+' de rellotge</small>' +
     (r.notes ? '<small class="note">'+esc(r.notes)+'</small>' : '') + '</div>' +
     '<span class="pill">'+r.pomos+' pom</span>' +
     '<button class="del" data-del="'+r.id+'" aria-label="Esborra">' +
@@ -1040,7 +1157,7 @@ function toast(msg){
 
 /* ============ esdeveniments ============ */
 $('playBtn').onclick = function(){ if (!S.active || !S.running) start(); else pause(); };
-$('stopBtn').onclick = openStop;
+$('stopBtn').onclick = function(){ openStop(); };
 $('nextBtn').onclick = function(){ audio(); if (S.phase === 'focusOver') toBreak(); else toFocus(); };
 function doSkip(){
   audio();
@@ -1069,8 +1186,35 @@ $('recAdd').onclick = function(){
 };
 $('recNone').onclick = function(){ closeGap(0); };
 
-$('stopCancel').onclick = function(){ $('dlgStop').close(); };
-$('stopSave').onclick = function(){ $('dlgStop').close(); commit(true); };
+$('orphSave').onclick = function(){ var t = lastUseful(); $('dlgOrphan').close(); commit(true, t); };
+$('orphDiscard').onclick = function(){
+  if (!confirm('Segur que vols descartar aquesta sessió? No es desarà enlloc.')) return;
+  $('dlgOrphan').close(); commit(false);
+};
+$('orphKeep').onclick = function(){ $('dlgOrphan').close(); };
+
+document.querySelectorAll('[data-add]').forEach(function(b){
+  b.onclick = function(){ addStudy(+b.dataset.add); };
+});
+$('addOther').onclick = function(){
+  var amagat = $('addCustom').classList.toggle('hidden');
+  $('addOther').setAttribute('aria-expanded', String(!amagat));
+  if (!amagat) $('addMin').focus();
+};
+function addCustom(){
+  var v = parseFloat(String($('addMin').value).replace(',', '.').replace(/[^0-9.]/g, ''));
+  if (addStudy(v)){
+    $('addMin').value = '';
+    $('addCustom').classList.add('hidden');
+    $('addOther').setAttribute('aria-expanded', 'false');
+  }
+}
+$('addGo').onclick = addCustom;
+$('addMin').onkeydown = function(e){ if (e.key === 'Enter'){ e.preventDefault(); addCustom(); } };
+
+$('stopCancel').onclick = function(){ S.stopAt = null; $('dlgStop').close(); };
+$('stopSave').onclick = function(){ var t = S.stopAt; $('dlgStop').close(); commit(true, t); };
+$('dlgStop').addEventListener('cancel', function(){ S.stopAt = null; });
 $('stopDiscard').onclick = function(){ $('dlgStop').close(); commit(false); };
 
 $('navTimer').onclick = function(){ showView('timer'); };
@@ -1151,7 +1295,8 @@ document.addEventListener('keydown', function(e){
    pàgina va morir, mirem quant fa de l'últim senyal de vida. */
 var diedRunning = S.active && S.running;
 if (S.active){ S.running = false; }
-if (diedRunning && S.beat){
+var orphan = S.active && ((Date.now() - lastUseful())/1000 > ORPHAN_AFTER);
+if (!orphan && diedRunning && S.beat){
   var away = (Date.now() - S.beat)/1000;
   if (away > 0 && away <= GRACE) applyTime(away, true);      // recàrrega normal
   else if (away > GRACE) S.gap = Math.round((S.gap||0) + away);
@@ -1160,7 +1305,9 @@ if (diedRunning && S.beat){
 $('tema').value = S.tema || '';
 if ('documentPictureInPicture' in window) $('pipBtn').classList.remove('hidden');
 render();
-if (S.gap) setTimeout(askGap, 400);
+if (orphan) setTimeout(askOrphan, 400);
+else if (S.gap) setTimeout(askGap, 400);
+else if (S.active && S.stopAt) setTimeout(function(){ openStop(S.stopAt); }, 400);
 renderLog();
 setSync(endpointReady() ? '' : 'bad', endpointReady() ? (queue.length ? queue.length+' sessions pendents' : 'Tot sincronitzat') : 'Configura el perfil i l\u2019URL als ajustos');
 setInterval(tick, 250);
