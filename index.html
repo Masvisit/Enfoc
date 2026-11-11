@@ -236,6 +236,68 @@ dialog::backdrop{background:rgba(10,14,19,.7)}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
 .over #clock{animation:pulse 1.8s ease-in-out infinite}
+
+/* ---------- anàlisi ---------- */
+body.wide .wrap{max-width:1040px}
+.a-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:18px 0 14px}
+.a-bar h2{margin:0;font-size:20px;letter-spacing:-.02em}
+.a-chips{display:flex;gap:2px;background:var(--surface);border-radius:10px;padding:3px}
+.a-chips button{padding:6px 13px;border-radius:8px;font-size:13.5px;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.a-chips button[aria-pressed="true"]{background:var(--surface-2);color:var(--text)}
+.a-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.a-kpi{background:var(--surface);border-radius:12px;padding:12px 14px;min-width:0}
+.a-kpi small{display:block;color:var(--muted);font-size:12px}
+.a-kpi b{display:block;font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.15;margin-top:2px;font-variant-numeric:tabular-nums}
+.a-kpi.u b{color:var(--focus)}
+.a-kpi span{display:block;color:var(--muted);font-size:12px;margin-top:1px}
+.a-grid{display:grid;gap:14px;grid-template-columns:minmax(0,1fr);margin-top:14px}
+.a-card{background:var(--surface);border-radius:var(--r);padding:16px 16px 14px;min-width:0}
+.a-card h3{margin:0;font-size:15px;font-weight:600}
+.a-card .a-sub{margin:2px 0 12px;color:var(--muted);font-size:12.5px;line-height:1.4}
+.a-chart{width:100%}
+.a-chart svg{display:block;width:100%;height:auto;overflow:visible}
+.a-chart text{font-size:11px;fill:var(--muted);font-family:inherit}
+.a-chart text.val{fill:var(--text);font-weight:600;paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round}
+.a-chart .hit{fill:transparent}
+.a-chart .hit:hover{fill:rgba(255,255,255,.07)}
+.a-lg{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.a-lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.a-lg i.dash{height:0;width:14px;border-top:2px dashed var(--muted);border-radius:0;vertical-align:3px}
+.a-lg i.ring{background:none;border:1.5px dashed var(--muted)}
+.a-ins{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.a-ins li{display:flex;gap:11px;font-size:14.5px;line-height:1.45}
+.a-ins li::before{content:'';flex:0 0 3px;border-radius:2px;background:var(--focus)}
+.a-ins li.warn::before{background:var(--extra)}
+.a-ins li.low::before{background:var(--line)}
+.a-note{color:var(--muted);font-size:12.5px;line-height:1.5}
+.a-note b{color:var(--text);font-weight:600}
+.a-tb{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.a-tb th{font-weight:500;color:var(--muted);text-align:right;padding:6px 6px;border-bottom:1px solid var(--line);font-size:12px}
+.a-tb td{white-space:nowrap;text-align:right;padding:7px 6px;border-bottom:1px solid var(--line)}
+.a-tb th:first-child,.a-tb td:first-child{text-align:left;padding-left:0}
+.a-tb tr:last-child td{border-bottom:0}
+.a-scroll{max-height:340px;overflow:auto}
+details.a-card summary{cursor:pointer;font-weight:600;font-size:15px}
+.a-empty{text-align:center;color:var(--muted);padding:60px 10px}
+.a-lg i.a-ramp{display:inline-block;width:70px;height:9px;border-radius:5px;vertical-align:-1px;margin:0 6px;background:linear-gradient(90deg,rgba(232,179,60,.1),rgba(232,179,60,1))}
+#tip{position:fixed;z-index:60;pointer-events:none;background:#0d141b;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12.5px;line-height:1.4;white-space:pre-line;opacity:0;transition:opacity .08s;max-width:240px;left:0;top:0}
+#tip.on{opacity:1}
+#tip b{display:block;font-weight:600}
+@media (min-width:760px){
+  .a-kpis{grid-template-columns:repeat(4,1fr)}
+  .a-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .a-card.full{grid-column:1/-1}
+}
+@media (max-width:560px){
+  nav button{padding:7px 10px}
+  .hbar{gap:10px}
+}
+
+.a-hb{display:grid;grid-template-columns:minmax(70px,30%) 1fr auto;gap:10px;align-items:center;font-size:13px;margin:8px 0}
+.a-hb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.a-hb div{height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.a-hb i{display:block;height:100%;background:var(--focus);border-radius:4px}
+.a-hb b{font-weight:600;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body data-phase="idle">
@@ -244,8 +306,9 @@ dialog::backdrop{background:rgba(10,14,19,.7)}
   <div class="wrap hbar">
     <div class="brand">En<span>foc</span></div>
     <nav>
-      <button id="navTimer" aria-current="true">Temporitzador</button>
+      <button id="navTimer" aria-current="true">Temps</button>
       <button id="navLog">Registre</button>
+      <button id="navStats">Anàlisi</button>
     </nav>
     <button class="icon-btn hidden" id="pipBtn" aria-label="Finestra flotant" title="Finestra flotant sempre al damunt">
       <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><rect x="12" y="11" width="8" height="6" rx="1" fill="currentColor"/></svg>
@@ -423,6 +486,19 @@ dialog::backdrop{background:rgba(10,14,19,.7)}
   </div>
 </dialog>
 
+<!-- ================= ANÀLISI ================= -->
+<main id="viewStats" class="wrap hidden">
+  <div class="a-bar">
+    <h2>Anàlisi</h2>
+    <div class="a-chips" id="statPer" role="group" aria-label="Període">
+      <button data-per="7">7 d</button><button data-per="30">30 d</button><button data-per="90">90 d</button><button data-per="tot">Tot</button>
+    </div>
+  </div>
+  <div id="statsBody"></div>
+  <div style="height:56px"></div>
+</main>
+
+<div id="tip" aria-hidden="true"></div>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -1157,7 +1233,7 @@ function renderCal(){
   var leg = meta ? '<div class="callegend"><i></i><span>Dia amb l\u2019objectiu de '+hores(meta)+' assolit</span></div>' : '';
   $('calDetail').insertAdjacentHTML('afterbegin', leg);
 }
-function renderLog(){ renderList(); renderCal(); }
+function renderLog(){ renderList(); renderCal(); if (typeof statsVisible === 'function' && statsVisible()) renderStats(); }
 
 /* ============ CSV ============ */
 function csv(){
@@ -1244,14 +1320,573 @@ $('stopSave').onclick = function(){ var t = S.stopAt; $('dlgStop').close(); comm
 $('dlgStop').addEventListener('cancel', function(){ S.stopAt = null; });
 $('stopDiscard').onclick = function(){ $('dlgStop').close(); commit(false); };
 
+
+/* ============ anàlisi ============ */
+var MES3 = ['gen','feb','mar','abr','mai','jun','jul','ago','set','oct','nov','des'];
+var DOWL = ['dilluns','dimarts','dimecres','dijous','divendres','dissabte','diumenge'];
+var EFF_REF = 0.8;        // un pomodoro net (25 de focus + 5 de descans, amb llarg cada 4) dóna ≈ 80 %
+var MIN_N = 3;            // mínim de sessions perquè una barra es consideri fiable
+var MIN_CLOCK = 5400;     // mínim de rellotge (1,5 h) perquè una hora del dia es consideri fiable
+var LEN_B = [{a:0,b:30,l:'<30'},{a:30,b:60,l:'30–60'},{a:60,b:90,l:'60–90'},{a:90,b:120,l:'90–120'},{a:120,b:180,l:'120–180'},{a:180,b:1e9,l:'>180'}];
+var ACC_B = [{a:0,b:0.01,l:'0 h'},{a:0.01,b:1,l:'<1 h'},{a:1,b:2,l:'1–2 h'},{a:2,b:3,l:'2–3 h'},{a:3,b:1e9,l:'3 h +'}];
+var statPer = '30';
+try{ statPer = localStorage.getItem('enfoc.statper') || '30'; }catch(e){}
+if (['7','30','90','tot'].indexOf(statPer) < 0) statPer = '30';
+var statD = null, statW = 0;
+
+function parseDay(iso){ var p = iso.split('-'); return new Date(+p[0], +p[1]-1, +p[2]); }
+function zeros(n){ var a = []; for (var i=0;i<n;i++) a.push(0); return a; }
+function sum(a){ return a.reduce(function(x,y){ return x+(y||0); }, 0); }
+function pct(x){ return Math.round(x*100)+'%'; }
+function dshort(d){ return d.getDate()+' '+MES3[d.getMonth()]; }
+function idxOf(B, v){ for (var i=0;i<B.length;i++) if (v >= B[i].a && v < B[i].b) return i; return B.length-1; }
+// Tram de rellotge que s'atribueix a una sessió. Les aturades curtes (fins a 1 h) compten
+// com a temps de la sessió (i baixen l'aprofitament); si n'hi ha de més llargues, no se sap
+// quan es va estudiar, així que només es considera el temps comptat a partir de l'hora d'inici.
+var PAUSE_CAP = 3600;
+function span(r){
+  var real = tempsReal(r), tall = (real - r.total) > GAP_HIST, llarga = (real - r.total) > PAUSE_CAP;
+  return {L: llarga ? r.total : Math.max(real, r.total), tall: tall, llarga: llarga && !tall, real: real};
+}
+function niceScale(mx, n){
+  n = n || 4; if (!(mx > 0)) mx = 1;
+  var raw = mx/n, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw/p;
+  var s = f<=1 ? 1 : f<=2 ? 2 : f<=5 ? 5 : 10, step = s*p, top = Math.ceil(mx/step - 1e-9)*step, t = [];
+  for (var v=0; v<=top+step*1e-6; v+=step) t.push(v);
+  return {max: top, ticks: t};
+}
+
+/* ---------- càlcul ---------- */
+function statsData(per){
+  var today = new Date(); today.setHours(0,0,0,0);
+  var cutoff = null;
+  if (per !== 'tot'){ cutoff = new Date(today); cutoff.setDate(cutoff.getDate() - (+per - 1)); }
+  var all = records.filter(function(r){
+    return r && /^\d{4}-\d{2}-\d{2}$/.test(r.data) && HM.test(r.inici) && isFinite(r.util) && isFinite(r.total);
+  });
+  var recs = all.filter(function(r){ return !cutoff || parseDay(r.data) >= cutoff; });
+  var D = {per:per, today:today, all:all, recs:recs, n:recs.length, U:0, T:0, L:0, pom:0, extra:0, avisos:0, llargues:0,
+           hU:zeros(24), hT:zeros(24), hL:zeros(24), heat:[], len:[], acc:[]};
+  var i;
+  for (i=0;i<7;i++) D.heat.push(zeros(24));
+  LEN_B.forEach(function(){ D.len.push({u:0,l:0,n:0}); });
+  ACC_B.forEach(function(){ D.acc.push({u:0,l:0,n:0}); });
+
+  // dies (sobre tots els registres: ratxes i tendència no depenen del filtre)
+  var allDays = {};
+  all.forEach(function(r){
+    var d = allDays[r.data] || (allDays[r.data] = {u:0,t:0,n:0});
+    d.u += r.util; d.t += r.total; d.n++;
+  });
+  D.allDays = allDays;
+
+  recs.forEach(function(r){
+    var sp = span(r);
+    if (sp.tall) D.avisos++; else if (sp.llarga) D.llargues++;
+    D.U += r.util; D.T += r.total; D.L += sp.L; D.pom += (+r.pomos||0); D.extra += (+r.extra||0);
+    if (sp.L > 0){
+      // l'útil i el total es reparteixen uniformement pel tram de rellotge de la sessió
+      var st = hmToSecs(r.inici), end = st + sp.L, t = st;
+      var base = (parseDay(r.data).getDay()+6)%7;
+      while (t < end - 0.5){
+        var hr = Math.floor(t/3600), nxt = Math.min((hr+1)*3600, end), ov = nxt - t, f = ov/sp.L;
+        var h24 = hr%24, dw = (base + Math.floor(hr/24))%7;
+        D.hU[h24] += r.util*f; D.hT[h24] += r.total*f; D.hL[h24] += ov; D.heat[dw][h24] += r.util*f;
+        t = nxt;
+      }
+      if (r.total > 0){
+        var b = D.len[idxOf(LEN_B, r.total/60)]; b.u += r.util; b.l += sp.L; b.n++;
+      }
+    }
+  });
+
+  // fatiga dins del dia: aprofitament segons l'útil que ja portaves acumulat abans de cada sessió
+  var byDay = {};
+  recs.forEach(function(r){ (byDay[r.data] = byDay[r.data] || []).push(r); });
+  Object.keys(byDay).forEach(function(k){
+    var acc = 0;
+    byDay[k].slice().sort(function(a,b){ return hmToSecs(a.inici) - hmToSecs(b.inici); }).forEach(function(r){
+      var sp = span(r);
+      if (r.total > 0 && sp.L > 0){ var b = D.acc[idxOf(ACC_B, acc/3600)]; b.u += r.util; b.l += sp.L; b.n++; }
+      acc += r.util;
+    });
+  });
+
+  // llista de dies del període (inclosos els buits)
+  var first = today;
+  recs.forEach(function(r){ var d = parseDay(r.data); if (d < first) first = d; });
+  D.start = cutoff || first;
+  D.dayList = [];
+  for (var d = new Date(D.start); d <= today; d.setDate(d.getDate()+1)){
+    var iso = isoDay(d), a = allDays[iso];
+    D.dayList.push({iso:iso, d:new Date(d), u:a?a.u:0, t:a?a.t:0, n:a?a.n:0});
+  }
+  D.studyDays = D.dayList.filter(function(x){ return x.u > 0; }).length;
+  D.best = D.dayList.reduce(function(m,x){ return x.u > (m?m.u:0) ? x : m; }, null);
+
+  // dia de la setmana
+  D.dowU = zeros(7); D.dowN = zeros(7); D.dowS = zeros(7);
+  D.dayList.forEach(function(x){
+    var k = (x.d.getDay()+6)%7; D.dowU[k] += x.u; D.dowN[k]++; if (x.u > 0) D.dowS[k]++;
+  });
+
+  // setmanes
+  var wk = {};
+  D.dayList.forEach(function(x){
+    var mon = new Date(x.d); mon.setDate(mon.getDate() - ((mon.getDay()+6)%7));
+    var key = isoDay(mon), w = wk[key] || (wk[key] = {d:mon,u:0,t:0});
+    w.u += x.u; w.t += x.t;
+  });
+  D.weeks = Object.keys(wk).sort().map(function(k){ return wk[k]; }).slice(-26);
+
+  // mesos
+  var mo = {};
+  recs.forEach(function(r){
+    var k = r.data.slice(0,7), m = mo[k] || (mo[k] = {k:k,u:0,t:0,l:0,n:0,pom:0,dies:{}});
+    m.u += r.util; m.t += r.total; m.l += span(r).L; m.n++; m.pom += (+r.pomos||0);
+    if (r.util > 0) m.dies[r.data] = 1;
+  });
+  D.months = Object.keys(mo).sort().reverse().map(function(k){ return mo[k]; });
+
+  // temes
+  var tm = {};
+  recs.forEach(function(r){
+    var lab = (r.tema || '').trim(), key = lab.toLowerCase();
+    var t = tm[key] || (tm[key] = {lab: lab || 'Sense tema', named: !!lab, u:0, n:0});
+    t.u += r.util; t.n++;
+  });
+  D.topics = Object.keys(tm).map(function(k){ return tm[k]; }).sort(function(a,b){ return b.u - a.u; });
+  D.namedTopics = D.topics.filter(function(t){ return t.named; }).length;
+
+  // ratxa (sobre tots els registres)
+  var keys = Object.keys(allDays).filter(function(k){ return allDays[k].u > 0; }).sort();
+  var run = 0, best = 0, prev = null;
+  keys.forEach(function(k){
+    var d = parseDay(k);
+    run = (prev && Math.round((d - prev)/864e5) === 1) ? run+1 : 1;
+    if (run > best) best = run;
+    prev = d;
+  });
+  var cur = 0, cd = new Date(today);
+  if (!(allDays[isoDay(cd)] && allDays[isoDay(cd)].u > 0)) cd.setDate(cd.getDate()-1);
+  while (allDays[isoDay(cd)] && allDays[isoDay(cd)].u > 0){ cur++; cd.setDate(cd.getDate()-1); }
+  D.streak = cur; D.streakBest = best;
+
+  // tendència: últims 14 dies contra els 14 anteriors
+  D.t1 = 0; D.t0 = 0;
+  all.forEach(function(r){
+    var k = Math.round((today - parseDay(r.data))/864e5);
+    if (k >= 0 && k < 14) D.t1 += r.util; else if (k >= 14 && k < 28) D.t0 += r.util;
+  });
+  return D;
+}
+
+function effOf(b){ return b.l > 0 ? b.u / b.l : null; }
+function hourRange(D){
+  var f = 24, l = -1;
+  for (var h=0;h<24;h++) if (D.hL[h] > 0){ if (h < f) f = h; l = h; }
+  if (l < 0) return [7, 21];
+  return [Math.min(7, f), Math.max(21, l)];
+}
+
+/* ---------- conclusions automàtiques ---------- */
+function insights(D){
+  var out = [], h;
+  function add(t, k){ out.push({t:t, k:k||''}); }
+  if (D.n < 8) add('Amb només <b>'+D.n+' '+(D.n===1?'sessió':'sessions')+'</b> en aquest període, les conclusions són orientatives. Amplia el període o espera tenir-ne més.', 'low');
+
+  // 1. franja amb més estudi
+  if (D.U > 0){
+    var bs = 0, bv = -1;
+    for (var s=0;s<24;s++){ var v = D.hU[s] + D.hU[(s+1)%24] + D.hU[(s+2)%24]; if (v > bv){ bv = v; bs = s; } }
+    var pk = 0, ph = 0; for (h=0;h<24;h++) if (D.hU[h] > pk){ pk = D.hU[h]; ph = h; }
+    add('La franja on més estudies és de <b>'+bs+' a '+((bs+3)%24)+' h</b>: '+hores(bv)+' útils, el '+pct(bv/D.U)+' del total. L’hora més forta és de '+ph+' a '+((ph+1)%24)+' h.');
+  }
+
+  // 2. aprofitament per hora
+  var hs = [];
+  for (h=0;h<24;h++) if (D.hL[h] >= MIN_CLOCK) hs.push({h:h, e:D.hU[h]/D.hL[h], l:D.hL[h]});
+  if (hs.length >= 3){
+    var hb = hs.reduce(function(a,b){ return b.e > a.e ? b : a; }), hw = hs.reduce(function(a,b){ return b.e < a.e ? b : a; });
+    var t = 'Quan millor <b>aprofites</b> el temps és de <b>'+hb.h+' a '+(hb.h+1)+' h</b> ('+pct(hb.e)+' del rellotge és focus).';
+    if (hb.e - hw.e >= 0.1) t += ' El punt més baix, de '+hw.h+' a '+(hw.h+1)+' h ('+pct(hw.e)+'): més descansos i pauses.';
+    add(t);
+  } else if (D.n >= 3){
+    add('Encara no hi ha prou hores de rellotge a cada franja horària per comparar l’aprofitament entre hores.', 'low');
+  }
+
+  // 3. fatiga dins del dia
+  var av = [];
+  D.acc.forEach(function(b, i){ if (b.n >= MIN_N && b.l > 0) av.push({i:i, e:effOf(b)}); });
+  if (av.length >= 2){
+    var ref = av[0].e, drop = null;
+    for (var j=1;j<av.length;j++){
+      if (av[j].e <= ref - 0.08){ drop = av[j]; break; }
+      if (av[j].e > ref) ref = av[j].e;
+    }
+    if (drop) add('<b>Fatiga durant el dia:</b> a partir del tram de '+ACC_B[drop.i].l+' d’estudi útil acumulat al dia, l’aprofitament cau del '+pct(ref)+' al '+pct(drop.e)+'. Aquí comences a fallar.', 'warn');
+    else add('No es veu una caiguda clara dins del dia: l’aprofitament es manté entre el '+pct(Math.min.apply(null, av.map(function(x){return x.e;})))+' i el '+pct(Math.max.apply(null, av.map(function(x){return x.e;})))+' (fins al tram de '+ACC_B[av[av.length-1].i].l+' d’estudi acumulat al dia).');
+  } else if (D.n >= 3){
+    add('Encara hi ha poques sessions per estimar quan et cansa estudiar dins del dia (calen ≥ '+MIN_N+' sessions per tram).', 'low');
+  }
+
+  // 4. durada de sessió
+  var lv = [];
+  D.len.forEach(function(b, i){ if (b.n >= MIN_N && b.l > 0) lv.push({i:i, e:effOf(b)}); });
+  if (lv.length >= 2){
+    var lb = lv.reduce(function(a,b){ return b.e > a.e ? b : a; }), lw = lv.reduce(function(a,b){ return b.e < a.e ? b : a; });
+    var t2 = 'Millor aprofitament en sessions de <b>'+LEN_B[lb.i].l+' min</b> ('+pct(lb.e)+').';
+    if (lb.e - lw.e >= 0.08) t2 += ' Les de '+LEN_B[lw.i].l+' min baixen al '+pct(lw.e)+'.';
+    add(t2);
+  }
+
+  // 5. dia de la setmana
+  var wd = -1, wv = 0;
+  for (var k=0;k<7;k++) if (D.dowN[k] > 0 && D.dowU[k]/D.dowN[k] > wv){ wv = D.dowU[k]/D.dowN[k]; wd = k; }
+  if (wd >= 0 && D.dayList.length >= 7) add('El dia més fort és el <b>'+DOWL[wd]+'</b>: de mitjana '+durada(wv)+' útils.');
+
+  // 6. objectiu diari
+  var g = goalSecs();
+  if (g > 0 && D.studyDays > 0){
+    var ok = D.dayList.filter(function(x){ return x.u >= g; }).length;
+    add('Has arribat a l’objectiu de '+hores(g)+' en <b>'+ok+' de '+D.studyDays+'</b> dies d’estudi ('+pct(ok/D.studyDays)+').');
+  }
+
+  // 7. tendència
+  if (D.t0 > 0 || D.t1 > 0){
+    if (D.t0 > 0){
+      var ch = (D.t1 - D.t0)/D.t0;
+      add('Últims 14 dies: <b>'+hores(D.t1)+'</b> útils, '+(Math.abs(ch) < 0.03 ? 'igual que' : pct(Math.abs(ch))+(ch > 0 ? ' més que' : ' menys que'))+' els 14 anteriors ('+hores(D.t0)+').');
+    } else add('Últims 14 dies: <b>'+hores(D.t1)+'</b> útils (abans no hi havia registres).');
+  }
+
+  if (D.llargues > 0) add(D.llargues+' '+(D.llargues===1?'sessió té':'sessions tenen')+' aturades de més d’1 h (dinar, tasques…): s’hi compta només el temps comptat, des de l’hora d’inici, i la pausa no penalitza l’aprofitament.', 'low');
+  if (D.avisos > 0) add(D.avisos+' '+(D.avisos===1?'sessió porta':'sessions porten')+' el ⚠ (es van quedar obertes): el seu horari és aproximat i pot desplaçar una mica les hores.', 'low');
+  return out;
+}
+
+/* ---------- gràfics (SVG sense llibreries) ---------- */
+function tipAttr(s){ return ' data-tip="'+esc(s)+'"'; }
+function topRound(x, y, w, h, r){
+  r = Math.max(0, Math.min(r, w/2, h));
+  return 'M'+x+','+(y+h)+'V'+(y+r)+(r?'Q'+x+','+y+' '+(x+r)+','+y+'H'+(x+w-r)+'Q'+(x+w)+','+y+' '+(x+w)+','+(y+r):'H'+(x+w))+'V'+(y+h)+'Z';
+}
+function xLabelsEvery(slot){ return Math.max(1, Math.ceil(34/slot)); }
+
+// Gràfic de barres genèric. items: {l, l2?, vals:[..]|null, tip, lab?, low?}
+function barChart(items, w, o){
+  var two = items.some(function(it){ return it.l2; });
+  var h = o.h || 190, m = {l:o.ml||40, r:8, t:16, b:two ? 38 : 24};
+  var iw = w - m.l - m.r, ih = h - m.t - m.b;
+  var tot = items.map(function(it){ return it.vals ? sum(it.vals) : 0; });
+  var sc = o.ticks ? {max:o.ticks[o.ticks.length-1], ticks:o.ticks}
+                   : niceScale(Math.max.apply(null, tot.concat([o.ref ? o.ref.v : 0, 1e-6])));
+  var slot = iw/items.length, bw = Math.min(slot*0.72, 30), every = xLabelsEvery(slot);
+  function Y(v){ return m.t + ih - ih*v/sc.max; }
+  var s = '<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+esc(o.aria||'')+'">';
+  sc.ticks.forEach(function(t){
+    s += '<line x1="'+m.l+'" x2="'+(w-m.r)+'" y1="'+Y(t)+'" y2="'+Y(t)+'" stroke="var(--line)" stroke-opacity="'+(t===0?1:.55)+'"/>' +
+         '<text x="'+(m.l-7)+'" y="'+(Y(t)+4)+'" text-anchor="end">'+o.yFmt(t)+'</text>';
+  });
+  items.forEach(function(it, i){
+    var x = m.l + i*slot + (slot-bw)/2, cx = m.l + i*slot + slot/2;
+    if (it.vals){
+      var acc = 0, last = -1;
+      it.vals.forEach(function(v, k){ if (v > 0) last = k; });
+      if (it.low){
+        s += '<circle cx="'+cx+'" cy="'+Y(tot[i])+'" r="4.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="3 2.5"/>';
+      } else {
+        it.vals.forEach(function(v, k){
+          if (!(v > 0)) return;
+          var seg = ih*v/sc.max, yb = Y(acc), gap = acc > 0 ? 2 : 0;
+          var segH = Math.max(1, seg - gap), segY = yb - gap - segH;
+          s += '<path d="'+(k === last ? topRound(x, segY, bw, segH, 4) : 'M'+x+','+segY+'h'+bw+'v'+segH+'h-'+bw+'Z')+'" fill="'+o.colors[k]+'"/>';
+          acc += v;
+        });
+      }
+      if (it.lab) s += '<text class="val" x="'+cx+'" y="'+(Y(tot[i])-5)+'" text-anchor="middle">'+esc(it.lab)+'</text>';
+    }
+    if (i % every === 0){
+      s += '<text x="'+cx+'" y="'+(h-(two?20:8))+'" text-anchor="middle">'+esc(it.l)+'</text>';
+      if (it.l2) s += '<text x="'+cx+'" y="'+(h-6)+'" text-anchor="middle" style="opacity:.75">'+esc(it.l2)+'</text>';
+    }
+  });
+  if (o.ref){
+    s += '<line x1="'+m.l+'" x2="'+(w-m.r)+'" y1="'+Y(o.ref.v)+'" y2="'+Y(o.ref.v)+'" stroke="var(--text)" stroke-opacity=".55" stroke-dasharray="4 4"/>' +
+         '';
+  }
+  items.forEach(function(it, i){
+    s += '<rect class="hit" x="'+(m.l+i*slot)+'" y="'+m.t+'" width="'+slot+'" height="'+ih+'"'+tipAttr(it.tip)+'/>';
+  });
+  return s + '</svg>';
+}
+
+function lineChart(D, w){
+  var days = D.dayList, n = days.length, cu = [], ct = [], a = 0, b = 0;
+  days.forEach(function(x){ a += x.u; b += x.t; cu.push(a); ct.push(b); });
+  var h = 220, m = {l:42, r:14, t:18, b:24}, iw = w-m.l-m.r, ih = h-m.t-m.b;
+  var sc = niceScale(Math.max(b/3600, 0.1));
+  function X(i){ return m.l + (n > 1 ? iw*i/(n-1) : iw/2); }
+  function Y(v){ return m.t + ih - ih*(v/3600)/sc.max; }
+  var s = '<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Hores útils i totals acumulades">';
+  sc.ticks.forEach(function(t){
+    var y = m.t + ih - ih*t/sc.max;
+    s += '<line x1="'+m.l+'" x2="'+(w-m.r)+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)" stroke-opacity="'+(t===0?1:.55)+'"/>' +
+         '<text x="'+(m.l-7)+'" y="'+(y+4)+'" text-anchor="end">'+(Math.round(t*10)/10)+' h</text>';
+  });
+  function path(arr){ return arr.map(function(v,i){ return (i?'L':'M')+X(i).toFixed(1)+','+Y(v).toFixed(1); }).join(''); }
+  if (n > 1){
+    s += '<path d="'+path(ct)+'" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
+         '<path d="'+path(cu)+'" fill="none" stroke="var(--focus)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+  }
+  s += '<circle cx="'+X(n-1)+'" cy="'+Y(ct[n-1])+'" r="4.5" fill="var(--muted)" stroke="var(--surface)" stroke-width="2"/>' +
+       '<circle cx="'+X(n-1)+'" cy="'+Y(cu[n-1])+'" r="4.5" fill="var(--focus)" stroke="var(--surface)" stroke-width="2"/>';
+  var nt = Math.min(n, w < 420 ? 4 : 6), seen = {};
+  for (var q=0;q<nt;q++){
+    var i = nt > 1 ? Math.round(q*(n-1)/(nt-1)) : 0;
+    if (seen[i]) continue; seen[i] = 1;
+    s += '<text x="'+X(i)+'" y="'+(h-8)+'" text-anchor="'+(i===0 && nt>1 ? 'start' : i===n-1 && nt>1 ? 'end' : 'middle')+'">'+dshort(days[i].d)+'</text>';
+  }
+  var slot = n > 1 ? iw/(n-1) : iw;
+  days.forEach(function(x, i){
+    s += '<rect class="hit" x="'+(X(i)-slot/2)+'" y="'+m.t+'" width="'+slot+'" height="'+ih+'"'+
+         tipAttr(DOW[(x.d.getDay()+6)%7]+' '+dshort(x.d)+'\nÚtil acumulat: '+durada(cu[i])+'\nTotal acumulat: '+durada(ct[i])+'\nAquest dia: '+durada(x.u)+' útils')+'/>';
+  });
+  return s + '</svg>';
+}
+
+function heatChart(D, w){
+  var r = hourRange(D), h0 = r[0], h1 = r[1], nc = h1-h0+1;
+  var ml = 24, cw = (w-ml)/nc, rh = Math.max(20, Math.min(30, cw)), top = 2;
+  var mx = 0; D.heat.forEach(function(row){ row.forEach(function(v){ if (v > mx) mx = v; }); });
+  var h = top + 7*rh + 22;
+  var s = '<svg viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Mapa de calor: minuts útils per dia de la setmana i hora">';
+  for (var d=0; d<7; d++){
+    s += '<text x="'+(ml-6)+'" y="'+(top + d*rh + rh/2 + 4)+'" text-anchor="end">'+DOW[d]+'</text>';
+    for (var k=0; k<nc; k++){
+      var hr = h0+k, v = D.heat[d][hr], x = ml + k*cw, y = top + d*rh;
+      var op = v > 0 ? 0.14 + 0.86*Math.sqrt(v/mx) : 0;
+      s += '<rect x="'+(x+1)+'" y="'+(y+1)+'" width="'+(cw-2)+'" height="'+(rh-2)+'" rx="4" fill="var(--surface-2)"/>';
+      if (v > 0) s += '<rect x="'+(x+1)+'" y="'+(y+1)+'" width="'+(cw-2)+'" height="'+(rh-2)+'" rx="4" fill="var(--focus)" fill-opacity="'+op.toFixed(3)+'"/>';
+      s += '<rect class="hit" x="'+x+'" y="'+y+'" width="'+cw+'" height="'+rh+'"'+tipAttr(DOWL[d]+' · '+hr+'–'+(hr+1)+' h\n'+(v > 0 ? durada(v)+' útils' : 'Sense estudi'))+'/>';
+    }
+  }
+  var every = Math.max(1, Math.ceil(26/cw));
+  for (var k2=0; k2<nc; k2+=every) s += '<text x="'+(ml + k2*cw + cw/2)+'" y="'+(h-6)+'" text-anchor="middle">'+(h0+k2)+'</text>';
+  return s + '</svg>';
+}
+
+var CH = {
+  cum: lineChart,
+  hours: function(D, w){
+    var r = hourRange(D), items = [];
+    for (var h=r[0]; h<=r[1]; h++){
+      var u = D.hU[h], d = Math.max(0, D.hT[h] - D.hU[h]);
+      items.push({l:String(h), vals:[u/3600, d/3600],
+        tip:h+'–'+(h+1)+' h\nÚtil: '+durada(u)+'\nDescans: '+durada(d)});
+    }
+    return barChart(items, w, {colors:['var(--focus)','var(--break)'], yFmt:function(v){ return (Math.round(v*10)/10)+' h'; }, aria:'Hores d’estudi per hora del dia'});
+  },
+  houreff: function(D, w){
+    var r = hourRange(D), items = [], best = -1, bv = -1, worst = -1, wv = 2;
+    for (var h=r[0]; h<=r[1]; h++){
+      var ok = D.hL[h] >= MIN_CLOCK, e = D.hL[h] > 0 ? D.hU[h]/D.hL[h] : null;
+      if (ok && e > bv){ bv = e; best = items.length; }
+      if (ok && e < wv){ wv = e; worst = items.length; }
+      items.push({l:String(h), vals: e === null ? null : [e], low: !ok,
+        tip: h+'–'+(h+1)+' h\n'+(e === null ? 'Sense dades' : 'Aprofitament: '+pct(e)+'\n'+durada(D.hL[h])+' de rellotge'+(ok ? '' : '\n(poques dades)'))});
+    }
+    if (best >= 0) items[best].lab = pct(bv);
+    if (worst >= 0 && worst !== best) items[worst].lab = pct(wv);
+    return barChart(items, w, {colors:['var(--focus)'], ticks:[0,.25,.5,.75,1], yFmt:pct, ref:{v:EFF_REF, label:'80 %'}, aria:'Aprofitament per hora del dia'});
+  },
+  heat: heatChart,
+  acc: function(D, w){
+    var items = D.acc.map(function(b, i){
+      var e = effOf(b);
+      return {l:ACC_B[i].l, l2:'n = '+b.n, vals: e === null ? null : [e], low: b.n < MIN_N, lab: (e !== null && b.n >= MIN_N) ? pct(e) : null,
+        tip:'Abans d’aquesta sessió ja portaves '+ACC_B[i].l+' d’útil aquell dia\n'+(e === null ? 'Sense sessions' : 'Aprofitament: '+pct(e)+'\n'+b.n+' sessions'+(b.n < MIN_N ? ' (poques)' : ''))};
+    });
+    return barChart(items, w, {colors:['var(--focus)'], ticks:[0,.25,.5,.75,1], yFmt:pct, ref:{v:EFF_REF, label:'80 %'}, aria:'Aprofitament segons hores acumulades al dia'});
+  },
+  len: function(D, w){
+    var items = D.len.map(function(b, i){
+      var e = effOf(b);
+      return {l:LEN_B[i].l, l2:'n = '+b.n, vals: e === null ? null : [e], low: b.n < MIN_N, lab: (e !== null && b.n >= MIN_N) ? pct(e) : null,
+        tip:'Sessions de '+LEN_B[i].l+' min\n'+(e === null ? 'Cap sessió' : 'Aprofitament: '+pct(e)+'\n'+b.n+' sessions'+(b.n < MIN_N ? ' (poques)' : ''))};
+    });
+    return barChart(items, w, {colors:['var(--focus)'], ticks:[0,.25,.5,.75,1], yFmt:pct, ref:{v:EFF_REF, label:'80 %'}, aria:'Aprofitament segons durada de la sessió'});
+  },
+  dow: function(D, w){
+    var items = [];
+    for (var k=0;k<7;k++){
+      var avg = D.dowN[k] ? D.dowU[k]/D.dowN[k] : 0;
+      items.push({l:DOW[k], vals:[avg/3600], lab: avg > 0 ? hores(avg) : null,
+        tip:DOWL[k]+'\nMitjana: '+durada(avg)+' útils\nHas estudiat '+D.dowS[k]+' de '+D.dowN[k]+' dies'});
+    }
+    return barChart(items, w, {colors:['var(--focus)'], yFmt:function(v){ return (Math.round(v*10)/10)+' h'; }, aria:'Mitjana d’estudi per dia de la setmana', h:180});
+  },
+  weeks: function(D, w){
+    var items = D.weeks.map(function(x){
+      var dd = Math.max(0, x.t - x.u), e = new Date(x.d); e.setDate(e.getDate()+6);
+      return {l:dshort(x.d), vals:[x.u/3600, dd/3600], tip:'Setmana del '+dshort(x.d)+' al '+dshort(e)+'\nÚtil: '+durada(x.u)+'\nDescans: '+durada(dd)};
+    });
+    return barChart(items, w, {colors:['var(--focus)','var(--break)'], yFmt:function(v){ return (Math.round(v*10)/10)+' h'; }, aria:'Hores per setmana', ml:40});
+  },
+  daily: function(D, w){
+    var items = [], g = goalSecs();
+    for (var i=29;i>=0;i--){
+      var d = new Date(D.today); d.setDate(d.getDate()-i);
+      var a = D.allDays[isoDay(d)] || {u:0,t:0,n:0};
+      items.push({l:String(d.getDate()), vals:[a.u/3600],
+        tip:DOW[(d.getDay()+6)%7]+' '+dshort(d)+'\nÚtil: '+durada(a.u)+'\nTotal: '+durada(a.t)+'\n'+a.n+' '+(a.n===1?'sessió':'sessions')+(g > 0 && a.u >= g ? '\n✓ objectiu assolit' : '')});
+    }
+    return barChart(items, w, {colors:['var(--focus)'], yFmt:function(v){ return (Math.round(v*10)/10)+' h'; }, ref: g > 0 ? {v:g/3600, label:'objectiu '+hores(g)} : null, aria:'Hores útils dels últims 30 dies', h:190});
+  }
+};
+
+/* ---------- pàgina ---------- */
+function aCard(title, sub, name, legend, cls){
+  return '<section class="a-card '+(cls||'')+'"><h3>'+title+'</h3><p class="a-sub">'+sub+'</p><div class="a-chart" data-c="'+name+'"></div>'+(legend ? '<div class="a-lg">'+legend+'</div>' : '')+'</section>';
+}
+var LG_UD = '<span><i style="background:var(--focus)"></i>Útil</span><span><i style="background:var(--break)"></i>Descans</span>';
+var LG_EFF = '<span><i style="background:var(--focus)"></i>Aprofitament</span><span><i class="dash"></i>Pomodoro net ≈ 80 %</span><span><i class="ring"></i>Poques dades</span>';
+
+function statsHtml(D){
+  var eff = D.L > 0 ? D.U/D.L : 0;
+  var kp = function(cls, lab, val, sub){ return '<div class="a-kpi '+cls+'"><small>'+lab+'</small><b>'+val+'</b><span>'+sub+'</span></div>'; };
+  var h = '<div class="a-kpis">' +
+    kp('u','Hores útils', hores(D.U), durada(D.U)) +
+    kp('','Hores totals', hores(D.T), 'amb '+durada(Math.max(0,D.T-D.U))+' de descans') +
+    kp('','Aprofitament', pct(eff), 'del rellotge és focus') +
+    kp('','Sessions', String(D.n), D.pom+' pomodoros') +
+    kp('','Dies d’estudi', String(D.studyDays), 'de '+D.dayList.length+' dies') +
+    kp('','Mitjana per dia', D.studyDays ? hores(D.U/D.studyDays) : '—', 'els dies que estudies') +
+    kp('','Millor dia', D.best && D.best.u > 0 ? hores(D.best.u) : '—', D.best && D.best.u > 0 ? dshort(D.best.d) : '') +
+    kp('','Ratxa', D.streak+(D.streak===1?' dia':' dies'), 'rècord: '+D.streakBest+(D.streakBest===1?' dia':' dies')) +
+  '</div>';
+
+  var ins = insights(D);
+  h += '<div class="a-grid"><section class="a-card full"><h3>Què en surt</h3><p class="a-sub">Conclusions automàtiques de les teves dades en aquest període.</p>' +
+       '<ul class="a-ins">'+ins.map(function(x){ return '<li class="'+x.k+'"><span>'+x.t+'</span></li>'; }).join('')+'</ul></section>';
+
+  h += aCard('Hores acumulades', 'Útil i total des del primer dia del període.', 'cum',
+             '<span><i style="background:var(--focus)"></i>Útil · '+hores(D.U)+'</span><span><i style="background:var(--muted)"></i>Total · '+hores(D.T)+'</span>', 'full');
+  h += aCard('A quina hora estudies', 'Hores totals del període per hora del dia (el temps de cada sessió es reparteix entre les hores que ocupa).', 'hours', LG_UD);
+  h += aCard('A quina hora aprofites més', 'Part del rellotge que és focus, per hora del dia. Més alt = menys descans i pauses.', 'houreff', LG_EFF);
+  h += aCard('Mapa setmanal', 'Minuts útils per dia de la setmana i hora. Com més fosc, més estudi.', 'heat',
+             '<span>Menys<i class="a-ramp"></i>Més</span>', 'full');
+  h += aCard('Quan comences a fallar (dins del dia)', 'Aprofitament de cada sessió segons les hores útils que ja portaves aquell dia. Si baixa, hi ha fatiga.', 'acc', LG_EFF);
+  h += aCard('Quan comences a fallar (per durada)', 'Aprofitament segons els minuts comptats de la sessió. Els descansos llargs del pomodoro ja en baixen una mica.', 'len', LG_EFF);
+  h += aCard('Dia de la setmana', 'Mitjana d’hores útils, comptant els dies sense estudi.', 'dow');
+  h += aCard('Setmana a setmana', 'Hores útils i de descans per setmana (dilluns a diumenge).', 'weeks', LG_UD);
+  h += aCard('Últims 30 dies', 'Hores útils de cada dia'+(goalSecs() > 0 ? ' amb la línia del teu objectiu.' : '.'), 'daily', goalSecs() > 0 ? '<span><i class="dash"></i>Objectiu '+hores(goalSecs())+'</span>' : '', 'full');
+
+  if (D.namedTopics >= 2){
+    var mxT = D.topics[0].u || 1;
+    h += '<section class="a-card"><h3>Per tema</h3><p class="a-sub">Hores útils segons el tema que has escrit.</p>' +
+      D.topics.slice(0,8).map(function(t){
+        return '<div class="a-hb"><span>'+esc(t.lab)+'</span><div><i style="width:'+Math.max(2, Math.round(100*t.u/mxT))+'%"></i></div><b>'+hores(t.u)+'</b></div>';
+      }).join('') + '</section>';
+  }
+
+  h += '<section class="a-card'+(D.namedTopics >= 2 ? '' : ' full')+'"><h3>Per mesos</h3><p class="a-sub">Resum mensual del període. Aprof. = aprofitament.</p><div class="a-scroll"><table class="a-tb"><thead><tr><th>Mes</th><th>Útil</th><th>Total</th><th>Aprof.</th><th>Sessions</th><th>Dies</th></tr></thead><tbody>' +
+    D.months.map(function(m){
+      var p = m.k.split('-');
+      return '<tr><td>'+MES3[+p[1]-1]+' '+p[0]+'</td><td>'+hores(m.u)+'</td><td>'+hores(m.t)+'</td><td>'+(m.l > 0 ? pct(m.u/m.l) : '—')+'</td><td>'+m.n+'</td><td>'+Object.keys(m.dies).length+'</td></tr>';
+    }).join('') + '</tbody></table></div></section>';
+
+  h += '<details class="a-card full"><summary>Dades dia a dia</summary><div class="a-scroll" style="margin-top:10px"><table class="a-tb"><thead><tr><th>Dia</th><th>Útil</th><th>Total</th><th>Sessions</th></tr></thead><tbody>' +
+    D.dayList.slice().reverse().filter(function(x){ return x.n > 0; }).slice(0,150).map(function(x){
+      return '<tr><td>'+DOW[(x.d.getDay()+6)%7]+' '+dshort(x.d)+'</td><td>'+durada(x.u)+'</td><td>'+durada(x.t)+'</td><td>'+x.n+'</td></tr>';
+    }).join('') + '</tbody></table></div></details>';
+
+  h += '<section class="a-card full"><h3>Com es calcula</h3><p class="a-note">' +
+    '<b>L’app mesura temps, no concentració.</b> Per això fa servir l’<b>aprofitament</b> com a indicador: temps útil ÷ temps de rellotge de la sessió (descansos i pauses inclosos). Un pomodoro net en dona ≈ 80 %; si baixa, hi ha més descans o més aturades. ' +
+    'Com que només es guarda l’hora d’inici i de final, el temps de cada sessió es reparteix de manera uniforme entre les hores que ocupa. Les sessions amb ⚠ o amb aturades de més d’1 h es mesuren només amb el temps comptat, des de l’hora d’inici. ' +
+    'Les barres de línia discontínua tenen menys de '+MIN_N+' sessions (o menys d’1,5 h de rellotge) i no s’han d’agafar al peu de la lletra.</p></section>';
+  return h + '</div>';
+}
+
+function fillCharts(){
+  if (!statD) return;
+  var root = $('statsBody');
+  var cw = root.clientWidth;
+  Array.prototype.forEach.call(root.querySelectorAll('.a-chart'), function(el){
+    var f = CH[el.getAttribute('data-c')];
+    var w = Math.max(240, Math.round(el.clientWidth || cw));
+    if (f) el.innerHTML = f(statD, w);
+  });
+  statW = cw;
+}
+
+function renderStats(){
+  statD = statsData(statPer);
+  Array.prototype.forEach.call(document.querySelectorAll('#statPer button'), function(b){
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-per') === statPer));
+  });
+  var el = $('statsBody');
+  if (!statD.n){
+    el.innerHTML = '<div class="a-empty">No hi ha sessions en aquest període.<br>Prova amb un període més llarg.</div>';
+    return;
+  }
+  el.innerHTML = statsHtml(statD);
+  fillCharts();
+}
+function statsVisible(){ return !$('viewStats').classList.contains('hidden'); }
+
+Array.prototype.forEach.call(document.querySelectorAll('#statPer button'), function(b){
+  b.onclick = function(){
+    statPer = b.getAttribute('data-per');
+    try{ localStorage.setItem('enfoc.statper', statPer); }catch(e){}
+    renderStats();
+  };
+});
+var statRaf = 0;
+window.addEventListener('resize', function(){
+  if (!statsVisible() || !statD) return;
+  cancelAnimationFrame(statRaf);
+  statRaf = requestAnimationFrame(function(){
+    if (Math.abs($('statsBody').clientWidth - statW) > 4) fillCharts();
+  });
+});
+
+// tooltip
+var tipEl = $('tip');
+function tipPlace(e){
+  var x = e.clientX + 14, y = e.clientY + 14, r = tipEl.getBoundingClientRect();
+  if (x + r.width > window.innerWidth - 8) x = e.clientX - r.width - 14;
+  if (y + r.height > window.innerHeight - 8) y = e.clientY - r.height - 14;
+  tipEl.style.transform = 'translate('+Math.max(8,x)+'px,'+Math.max(8,y)+'px)';
+}
+document.addEventListener('pointerover', function(e){
+  var t = e.target.closest ? e.target.closest('[data-tip]') : null;
+  if (!t){ tipEl.classList.remove('on'); return; }
+  var lines = t.getAttribute('data-tip').split('\n');
+  tipEl.innerHTML = '<b>'+esc(lines[0])+'</b>'+esc(lines.slice(1).join('\n'));
+  tipEl.classList.add('on'); tipPlace(e);
+});
+document.addEventListener('pointermove', function(e){
+  if (tipEl.classList.contains('on')) tipPlace(e);
+});
+document.addEventListener('pointerdown', function(e){
+  if (!(e.target.closest && e.target.closest('[data-tip]'))) tipEl.classList.remove('on');
+});
+document.addEventListener('scroll', function(){ tipEl.classList.remove('on'); }, true);
+
 $('navTimer').onclick = function(){ showView('timer'); };
+$('navStats').onclick = function(){ showView('stats'); };
 $('navLog').onclick = function(){ showView('log'); };
 function showView(v){
   $('viewTimer').classList.toggle('hidden', v!=='timer');
   $('viewLog').classList.toggle('hidden', v!=='log');
+  $('viewStats').classList.toggle('hidden', v!=='stats');
+  document.body.classList.toggle('wide', v==='stats');
   $('navTimer').setAttribute('aria-current', v==='timer');
   $('navLog').setAttribute('aria-current', v==='log');
+  $('navStats').setAttribute('aria-current', v==='stats');
   if (v==='log'){ renderLog(); flush(true); }
+  if (v==='stats'){ renderStats(); }
   window.scrollTo(0,0);
 }
 $('segList').onclick = function(){ segTo('list'); };
