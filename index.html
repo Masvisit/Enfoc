@@ -357,6 +357,23 @@ details.a-card summary{cursor:pointer;font-weight:600;font-size:15px}
 .p-dow-pick button.on{background:color-mix(in srgb,var(--focus) 30%,var(--surface));color:var(--focus);font-weight:600}
 .p-legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:10px}
 .p-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.p-alert{border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.45;margin-bottom:10px}
+.p-alert.warn{background:color-mix(in srgb,var(--extra) 15%,var(--bg));border-left:3px solid var(--extra)}
+.p-alert.danger{background:color-mix(in srgb,var(--danger) 15%,var(--bg));border-left:3px solid var(--danger)}
+.p-alert.ok{background:color-mix(in srgb,var(--break) 15%,var(--bg));border-left:3px solid var(--break)}
+.p-pag-row{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;color:var(--muted)}
+.p-pag-row input[type=number]{width:52px;padding:4px 6px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);color:var(--text);font-size:13px;text-align:center;-moz-appearance:textfield}
+.p-pag-row input::-webkit-inner-spin-button{-webkit-appearance:none}
+.p-pag-bar{flex:1;height:6px;background:var(--surface-2);border-radius:3px;overflow:hidden;max-width:120px}
+.p-pag-bar i{display:block;height:100%;background:var(--focus);border-radius:3px;transition:width .3s}
+.p-fd{padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.p-fd:last-child{border-bottom:0}
+.p-fd-head{font-weight:600;margin-bottom:4px;display:flex;align-items:baseline;gap:6px}
+.p-fd-head .fd-dow{min-width:24px}
+.p-fd-head .fd-tag{font-size:11px;font-weight:400;color:var(--muted)}
+.p-fd-head.today .fd-dow{color:var(--focus)}
+.p-fd-tasks{padding-left:30px;line-height:1.55;color:var(--muted)}
+.p-fd-tasks span{color:var(--text);font-weight:500}
 @media (max-width:420px){
   .p-kpis{grid-template-columns:1fr 1fr}
   .p-week{gap:4px}
@@ -571,6 +588,7 @@ details.a-card summary{cursor:pointer;font-weight:600;font-size:15px}
   </div>
 
   <div class="p-kpis" id="planKpis"></div>
+  <div id="planAlerts"></div>
 
   <div class="p-card" id="planToday"></div>
 
@@ -582,6 +600,7 @@ details.a-card summary{cursor:pointer;font-weight:600;font-size:15px}
   <div class="p-card">
     <h3>Setmana</h3>
     <div id="planWeek"></div>
+    <div id="planForecast" style="margin-top:12px"></div>
   </div>
 
   <div class="p-card">
@@ -2151,6 +2170,8 @@ if (!plan) {
   plan.done = pre;
   savePlan();
 }
+/* migration: ensure pagsDone exists */
+if (!plan.pagsDone) { plan.pagsDone = {}; savePlan(); }
 function savePlan(){ save(planK, plan); }
 function tPags(t){ return plan.pags[t.id] || t.pags; }
 
@@ -2172,8 +2193,16 @@ function planTotalPags(){
 }
 function planDonePags(){
   var t = 0;
-  TEMARI.forEach(function(x){ if (plan.done[x.id+'-apunts']) t += tPags(x); });
+  TEMARI.forEach(function(x){
+    if (plan.done[x.id+'-apunts']) t += tPags(x);
+    else if (plan.pagsDone[x.id]) t += Math.min(plan.pagsDone[x.id], tPags(x));
+  });
   return t;
+}
+function planDailyTarget(){
+  var rem = planTotalPags() - planDonePags();
+  var days = planStudyDays();
+  return days > 0 ? Math.ceil(rem / days) : 0;
 }
 function planPhaseCount(phase){
   var done = 0;
@@ -2207,12 +2236,20 @@ function planSuggestToday(){
     if (!plan.done[TEMARI[i].id+'-apunts']){ nextApunts = TEMARI[i]; break; }
   }
   if (nextApunts){
-    var mins = Math.round(tPags(nextApunts) * 3);
+    var curPag = plan.pagsDone[nextApunts.id] || 0;
+    var totPag = tPags(nextApunts);
+    var target = planDailyTarget();
+    var endPag = Math.min(curPag + Math.max(target, 1), totPag);
+    var mins = Math.round((endPag - curPag) * 3);
     tasks.push({
       key: nextApunts.id+'-apunts',
       label: 'Apunts: '+nextApunts.id+' — '+nextApunts.nom,
-      sub: tPags(nextApunts)+' pàg. (~'+mins+' min via IA)',
-      done: checked.indexOf(nextApunts.id+'-apunts') >= 0
+      sub: 'Pàg. '+(curPag+1)+'–'+endPag+' de '+totPag+' (~'+mins+' min via IA)',
+      done: checked.indexOf(nextApunts.id+'-apunts') >= 0,
+      pagInput: true,
+      temaId: nextApunts.id,
+      curPag: curPag,
+      totPag: totPag
     });
   }
 
@@ -2273,6 +2310,60 @@ function planSuggestToday(){
   return tasks.slice(0, maxTasks);
 }
 
+function planForecast(nDays){
+  var fc = [];
+  var target = planDailyTarget();
+  if (target <= 0) return fc;
+  /* find current apunts position */
+  var tIdx = -1, pOff = 0;
+  for (var i = 0; i < TEMARI.length; i++){
+    if (!plan.done[TEMARI[i].id+'-apunts']){
+      tIdx = i; pOff = plan.pagsDone[TEMARI[i].id] || 0; break;
+    }
+  }
+  /* virtual state for test/fitxes/repas — copy current done */
+  var vDone = {};
+  for (var k in plan.done) vDone[k] = plan.done[k];
+  /* track which temes will have apunts done by each day */
+  var newApuntsDone = [];
+
+  var d = new Date(); d.setHours(0,0,0,0);
+  for (var day = 0; day < nDays; day++){
+    var fd = new Date(d); fd.setDate(d.getDate() + day);
+    var items = [];
+    /* apunts projection */
+    if (tIdx >= 0 && tIdx < TEMARI.length){
+      var t = TEMARI[tIdx], tp = tPags(t);
+      var ep = Math.min(pOff + target, tp);
+      items.push({phase:'apunts',id:t.id,from:pOff+1,to:ep,total:tp});
+      pOff = ep;
+      if (pOff >= tp){
+        vDone[t.id+'-apunts'] = 1;
+        newApuntsDone.push(t.id);
+        tIdx++; pOff = 0;
+        while(tIdx < TEMARI.length && plan.done[TEMARI[tIdx].id+'-apunts']) tIdx++;
+      }
+    }
+    /* test/fitxes/repas: pick ONE per day, advancing virtual state */
+    var phases2 = ['test','fitxes','repas'];
+    var deps = {test:'apunts',fitxes:'apunts',repas:'fitxes'};
+    var picked = false;
+    for (var pi = 0; pi < phases2.length && !picked; pi++){
+      var p = phases2[pi];
+      for (var j = 0; j < TEMARI.length; j++){
+        if (vDone[TEMARI[j].id+'-'+deps[p]] && !vDone[TEMARI[j].id+'-'+p]){
+          items.push({phase:p,id:TEMARI[j].id});
+          vDone[TEMARI[j].id+'-'+p] = 1;
+          picked = true; break;
+        }
+      }
+    }
+    fc.push({date:fd,dow:DOW_NAMES[fd.getDay()],day:fd.getDate(),month:fd.getMonth()+1,
+      isToday:day===0,free:isFreeDay(fd),items:items});
+  }
+  return fc;
+}
+
 function renderPlan(){
   var daysLeft = planDaysLeft();
   var totalPags = planTotalPags();
@@ -2309,6 +2400,31 @@ function renderPlan(){
   kH += '<div class="p-kpi'+(Number(pagsPerDay)<=5?' ok':Number(pagsPerDay)<=10?' warn':' behind')+'"><b>'+pagsPerDay+'</b><small>Pàg./dia necessàries</small></div>';
   $('planKpis').innerHTML = kH;
 
+  /* Alerts */
+  var aH = '';
+  if (Number(pagsPerDay) > 8){
+    aH += '<div class="p-alert danger">🔴 Objectiu massa alt: '+pagsPerDay+' pàg/dia. Considera reorganitzar prioritats o afegir hores.</div>';
+  } else if (Number(pagsPerDay) > 5){
+    aH += '<div class="p-alert warn">⚠ Ritme ajustat: '+pagsPerDay+' pàg/dia necessàries. Mantingues la constància!</div>';
+  }
+  if (daysStudied > 0 && Number(avgHoursDay) < 1.5){
+    aH += '<div class="p-alert warn">⚠ Mitjana baixa: '+avgHoursDay+'h/dia (últims 14d). Intenta arribar a 2-3h.</div>';
+  }
+  /* days since last study */
+  var lastStudy = null;
+  records.forEach(function(r){ var rd=r.data; if(!lastStudy||rd>lastStudy) lastStudy=rd; });
+  if (lastStudy){
+    var lsd = new Date(lastStudy+'T00:00:00');
+    var daysSince = Math.floor((today - lsd)/86400000);
+    if (daysSince >= 3){
+      aH += '<div class="p-alert warn">⚠ Fa '+daysSince+' dies que no estudies. Cada dia compta!</div>';
+    }
+  }
+  if (pctOverall >= 80){
+    aH += '<div class="p-alert ok">✅ Més del 80% completat — la recta final!</div>';
+  }
+  $('planAlerts').innerHTML = aH;
+
   /* Today's tasks */
   var tasks = planSuggestToday();
   var todayDate = new Date();
@@ -2323,6 +2439,15 @@ function renderPlan(){
       tH += '<input type="checkbox" data-check="'+t.key+'"'+(t.done?' checked':'')+'>';
       tH += '<label data-check-label="'+t.key+'">'+t.label+'<small>'+t.sub+'</small></label>';
       tH += '</div>';
+      if (t.pagInput){
+        var pPct = t.totPag > 0 ? Math.round(t.curPag/t.totPag*100) : 0;
+        tH += '<div class="p-pag-row">';
+        tH += '<span>Pàg. fetes:</span>';
+        tH += '<input type="number" id="pagDoneInput" min="0" max="'+t.totPag+'" value="'+t.curPag+'" data-tema="'+t.temaId+'" data-total="'+t.totPag+'">';
+        tH += '<span>/ '+t.totPag+'</span>';
+        tH += '<div class="p-pag-bar"><i style="width:'+pPct+'%"></i></div>';
+        tH += '</div>';
+      }
     });
   }
   if (daysStudied > 0){
@@ -2366,6 +2491,30 @@ function renderPlan(){
   wH += '</div>';
   $('planWeek').innerHTML = wH;
 
+  /* Forecast */
+  var fc = planForecast(7);
+  var fH = '';
+  fc.forEach(function(f){
+    fH += '<div class="p-fd">';
+    fH += '<div class="p-fd-head'+(f.isToday?' today':'')+'">';
+    fH += '<span class="fd-dow">'+f.dow.toUpperCase()+' '+f.day+'/'+ f.month+'</span>';
+    fH += '<span class="fd-tag">'+(f.free?'dia lliure':'feina')+'</span>';
+    fH += '</div>';
+    if (f.items.length){
+      fH += '<div class="p-fd-tasks">';
+      f.items.forEach(function(it){
+        if (it.phase === 'apunts'){
+          fH += '<div><span>Apunts '+it.id+'</span>: pàg. '+it.from+'–'+it.to+' de '+it.total+'</div>';
+        } else {
+          fH += '<div><span>'+PH_LABEL[it.phase]+' '+it.id+'</span></div>';
+        }
+      });
+      fH += '</div>';
+    }
+    fH += '</div>';
+  });
+  $('planForecast').innerHTML = fH;
+
   /* Temari lists */
   renderTemariGroup('planGeneric', 'G');
   renderTemariGroup('planSpecific', 'E');
@@ -2397,6 +2546,27 @@ document.addEventListener('click', function(e){
   if (ph){
     var key = ph.dataset.toggle;
     plan.done[key] = !plan.done[key];
+    savePlan();
+    renderPlan();
+    return;
+  }
+});
+/* page progress input */
+document.addEventListener('change', function(e){
+  if (e.target.id === 'pagDoneInput'){
+    var temaId = e.target.dataset.tema;
+    var total = parseInt(e.target.dataset.total);
+    var val = Math.max(0, Math.min(parseInt(e.target.value) || 0, total));
+    e.target.value = val;
+    plan.pagsDone[temaId] = val;
+    /* auto-mark apunts done if all pages completed */
+    if (val >= total){
+      plan.done[temaId+'-apunts'] = 1;
+      delete plan.pagsDone[temaId];
+    } else if (plan.done[temaId+'-apunts']) {
+      /* if they reduce pages, unmark done */
+      delete plan.done[temaId+'-apunts'];
+    }
     savePlan();
     renderPlan();
     return;
