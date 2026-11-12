@@ -307,7 +307,7 @@ details.a-card summary{cursor:pointer;font-weight:600;font-size:15px}
 .p-header{display:flex;align-items:center;justify-content:space-between;margin:18px 0 14px}
 .p-header h2{margin:0;font-size:20px;letter-spacing:-.02em}
 .p-edit-btn{font-size:18px;width:36px;height:36px;border-radius:10px;background:var(--surface);display:grid;place-items:center;color:var(--muted)}
-.p-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.p-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
 .p-kpi{background:var(--surface);border-radius:12px;padding:12px 14px}
 .p-kpi small{display:block;color:var(--muted);font-size:12px}
 .p-kpi b{display:block;font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1.15;margin-top:2px;font-variant-numeric:tabular-nums}
@@ -385,7 +385,7 @@ details.a-card summary{cursor:pointer;font-weight:600;font-size:15px}
 .p-fd-tasks{padding-left:30px;line-height:1.55;color:var(--muted)}
 .p-fd-tasks span{color:var(--text);font-weight:500}
 @media (max-width:420px){
-  .p-kpis{grid-template-columns:1fr 1fr}
+  .p-kpis{grid-template-columns:repeat(3,1fr)}
   .p-week{gap:4px}
   .p-wday .lbl{font-size:10px}
 }
@@ -2122,31 +2122,31 @@ document.addEventListener('keydown', function(e){
 
 /* ============ pla d'estudi ============ */
 var TEMARI = [
-  {id:'G1',nom:'Constitució, Estatut i organització territorial',pags:30,grup:'G'},
-  {id:'G2',nom:'Administració pública catalana',pags:25,grup:'G'},
-  {id:'G3',nom:'Procediment administratiu i potestat sancionadora',pags:25,grup:'G'},
-  {id:'G4',nom:'Ocupació pública i igualtat',pags:20,grup:'G'},
-  {id:'E1',nom:'Cos d\'Agents Rurals: organització i funcions',pags:30,grup:'E'},
-  {id:'E2',nom:'Policia judicial i delictes mediambientals',pags:14,grup:'E'},
-  {id:'E3',nom:'Activitat cinegètica',pags:24,grup:'E'},
-  {id:'E4',nom:'Regulació d\'armes',pags:20,grup:'E'},
-  {id:'E5',nom:'Pesca esportiva continental',pags:22,grup:'E'},
-  {id:'E6',nom:'Animals de companyia',pags:22,grup:'E'},
-  {id:'E7',nom:'Fauna salvatge autòctona',pags:26,grup:'E'},
-  {id:'E8',nom:'Espècies exòtiques invasores',pags:18,grup:'E'},
-  {id:'E9',nom:'Prevenció d\'incendis forestals',pags:28,grup:'E'},
-  {id:'E10',nom:'Extinció d\'incendis i emergències',pags:24,grup:'E'},
-  {id:'E11',nom:'Protecció i gestió forestal',pags:26,grup:'E'},
-  {id:'E12',nom:'Flora protegida',pags:20,grup:'E'},
-  {id:'E13',nom:'Patrimoni natural i biodiversitat',pags:24,grup:'E'},
-  {id:'E14',nom:'Espais naturals protegits i Natura 2000',pags:28,grup:'E'},
-  {id:'E15',nom:'Ús recreatiu del medi natural',pags:20,grup:'E'},
-  {id:'E16',nom:'Urbanisme en sòl no urbanitzable',pags:22,grup:'E'},
-  {id:'E17',nom:'Domini públic hidràulic',pags:24,grup:'E'},
-  {id:'E18',nom:'Residus i activitats extractives',pags:22,grup:'E'},
-  {id:'E19',nom:'Protecció civil: PROCICAT',pags:24,grup:'E'},
-  {id:'E20',nom:'Geografia física i política de Catalunya',pags:22,grup:'E'},
-  {id:'E21',nom:'Cartografia, orientació i meteorologia',pags:20,grup:'E'}
+  {id:'G1',nom:'Constitució, Estatut i organització territorial',pags:30,ft:60,grup:'G'},
+  {id:'G2',nom:'Administració pública catalana',pags:25,ft:50,grup:'G'},
+  {id:'G3',nom:'Procediment administratiu i potestat sancionadora',pags:25,ft:50,grup:'G'},
+  {id:'G4',nom:'Ocupació pública i igualtat',pags:20,ft:40,grup:'G'},
+  {id:'E1',nom:'Cos d\'Agents Rurals: organització i funcions',pags:30,ft:59,grup:'E'},
+  {id:'E2',nom:'Policia judicial i delictes mediambientals',pags:14,ft:28,grup:'E'},
+  {id:'E3',nom:'Activitat cinegètica',pags:24,ft:48,grup:'E'},
+  {id:'E4',nom:'Regulació d\'armes',pags:20,ft:40,grup:'E'},
+  {id:'E5',nom:'Pesca esportiva continental',pags:22,ft:44,grup:'E'},
+  {id:'E6',nom:'Animals de companyia',pags:22,ft:44,grup:'E'},
+  {id:'E7',nom:'Fauna salvatge autòctona',pags:26,ft:52,grup:'E'},
+  {id:'E8',nom:'Espècies exòtiques invasores',pags:18,ft:36,grup:'E'},
+  {id:'E9',nom:'Prevenció d\'incendis forestals',pags:28,ft:56,grup:'E'},
+  {id:'E10',nom:'Extinció d\'incendis i emergències',pags:24,ft:48,grup:'E'},
+  {id:'E11',nom:'Protecció i gestió forestal',pags:26,ft:52,grup:'E'},
+  {id:'E12',nom:'Flora protegida',pags:20,ft:40,grup:'E'},
+  {id:'E13',nom:'Patrimoni natural i biodiversitat',pags:24,ft:48,grup:'E'},
+  {id:'E14',nom:'Espais naturals protegits i Natura 2000',pags:28,ft:56,grup:'E'},
+  {id:'E15',nom:'Ús recreatiu del medi natural',pags:20,ft:40,grup:'E'},
+  {id:'E16',nom:'Urbanisme en sòl no urbanitzable',pags:22,ft:44,grup:'E'},
+  {id:'E17',nom:'Domini públic hidràulic',pags:24,ft:48,grup:'E'},
+  {id:'E18',nom:'Residus i activitats extractives',pags:22,ft:44,grup:'E'},
+  {id:'E19',nom:'Protecció civil: PROCICAT',pags:24,ft:48,grup:'E'},
+  {id:'E20',nom:'Geografia física i política de Catalunya',pags:22,ft:44,grup:'E'},
+  {id:'E21',nom:'Cartografia, orientació i meteorologia',pags:20,ft:40,grup:'E'}
 ];
 var PL_PH = ['apunts','test','fitxes','repas'];
 var PH_LABEL = {apunts:'Apunts',test:'Test',fitxes:'Fitxes',repas:'Repàs'};
@@ -2181,10 +2181,13 @@ if (!plan) {
   plan.done = pre;
   savePlan();
 }
-/* migration: ensure pagsDone exists */
+/* migration: ensure pagsDone and fitxesPagsDone exist */
 if (!plan.pagsDone) { plan.pagsDone = {}; savePlan(); }
+if (!plan.fitxesPagsDone) { plan.fitxesPagsDone = {}; savePlan(); }
+if (!plan.fitxesCounts) { plan.fitxesCounts = {}; savePlan(); }
 function savePlan(){ save(planK, plan); }
 function tPags(t){ return plan.pags[t.id] || t.pags; }
+function tFitxes(t){ return plan.fitxesCounts[t.id] || t.ft || 0; }
 
 function planDaysLeft(){
   var ex = new Date(plan.examDate+'T00:00:00');
@@ -2212,6 +2215,22 @@ function planDonePags(){
 }
 function planDailyTarget(){
   var rem = planTotalPags() - planDonePags();
+  var days = planStudyDays();
+  return days > 0 ? Math.ceil(rem / days) : 0;
+}
+function planTotalFitxes(){
+  var t = 0; TEMARI.forEach(function(x){ t += tFitxes(x); }); return t;
+}
+function planDoneFitxes(){
+  var t = 0;
+  TEMARI.forEach(function(x){
+    if (plan.done[x.id+'-fitxes']) t += tFitxes(x);
+    else if (plan.fitxesPagsDone[x.id]) t += Math.min(plan.fitxesPagsDone[x.id], tFitxes(x));
+  });
+  return t;
+}
+function planDailyFitxesTarget(){
+  var rem = planTotalFitxes() - planDoneFitxes();
   var days = planStudyDays();
   return days > 0 ? Math.ceil(rem / days) : 0;
 }
@@ -2284,11 +2303,16 @@ function planSuggestToday(){
     if (plan.done[TEMARI[i].id+'-apunts'] && !plan.done[TEMARI[i].id+'-fitxes']){ nextFit = TEMARI[i]; break; }
   }
   if (nextFit){
+    var curFt = plan.fitxesPagsDone[nextFit.id] || 0;
+    var totFt = tFitxes(nextFit);
+    var ftTarget = planDailyFitxesTarget();
+    var endFt = Math.min(curFt + Math.max(ftTarget, 1), totFt);
     tasks.push({
       key: nextFit.id+'-fitxes',
       label: 'Fitxes: '+nextFit.id+' — '+nextFit.nom,
-      sub: 'Crear fitxes de repàs',
-      done: checked.indexOf(nextFit.id+'-fitxes') >= 0
+      sub: 'Fitxa '+(curFt+1)+'–'+endFt+' de '+totFt,
+      done: checked.indexOf(nextFit.id+'-fitxes') >= 0,
+      fitxInput: true, temaId: nextFit.id, curFt: curFt, totFt: totFt
     });
   }
 
@@ -2518,10 +2542,14 @@ function renderPlan(){
 
   /* KPIs */
   var kH = '';
+  var ftPerDay = planDailyFitxesTarget();
+  var ftRemaining = planTotalFitxes() - planDoneFitxes();
   kH += '<div class="p-kpi accent"><b>'+daysLeft+'</b><small>Dies fins l\'examen</small></div>';
   kH += '<div class="p-kpi'+(pctOverall>=50?' ok':pctOverall>=25?' warn':' behind')+'"><b>'+pctOverall+'%</b><small>Temari completat</small></div>';
   kH += '<div class="p-kpi"><b>'+remaining+'</b><small>Pàg. pendents</small></div>';
-  kH += '<div class="p-kpi'+(Number(pagsPerDay)<=5?' ok':Number(pagsPerDay)<=10?' warn':' behind')+'"><b>'+pagsPerDay+'</b><small>Pàg./dia necessàries</small></div>';
+  kH += '<div class="p-kpi'+(Number(pagsPerDay)<=5?' ok':Number(pagsPerDay)<=10?' warn':' behind')+'"><b>'+pagsPerDay+'</b><small>Pàg./dia apunts</small></div>';
+  kH += '<div class="p-kpi"><b>'+ftRemaining+'</b><small>Fitxes pendents</small></div>';
+  kH += '<div class="p-kpi'+(ftPerDay<=4?' ok':ftPerDay<=8?' warn':' behind')+'"><b>'+ftPerDay+'</b><small>Fitxes/dia</small></div>';
   $('planKpis').innerHTML = kH;
 
   /* Alerts */
@@ -2586,6 +2614,15 @@ function renderPlan(){
         tH += '<input type="number" id="pagDoneInput" min="0" max="'+t.totPag+'" value="'+t.curPag+'" data-tema="'+t.temaId+'" data-total="'+t.totPag+'">';
         tH += '<span>/ '+t.totPag+'</span>';
         tH += '<div class="p-pag-bar"><i style="width:'+pPct+'%"></i></div>';
+        tH += '</div>';
+      }
+      if (t.fitxInput){
+        var fPct = t.totFt > 0 ? Math.round(t.curFt/t.totFt*100) : 0;
+        tH += '<div class="p-pag-row">';
+        tH += '<span>Fitxes fetes:</span>';
+        tH += '<input type="number" id="fitxDoneInput" min="0" max="'+t.totFt+'" value="'+t.curFt+'" data-tema="'+t.temaId+'" data-total="'+t.totFt+'">';
+        tH += '<span>/ '+t.totFt+'</span>';
+        tH += '<div class="p-pag-bar"><i style="width:'+fPct+'%"></i></div>';
         tH += '</div>';
       }
     });
@@ -2710,13 +2747,27 @@ document.addEventListener('change', function(e){
     var val = Math.max(0, Math.min(parseInt(e.target.value) || 0, total));
     e.target.value = val;
     plan.pagsDone[temaId] = val;
-    /* auto-mark apunts done if all pages completed */
     if (val >= total){
       plan.done[temaId+'-apunts'] = 1;
       delete plan.pagsDone[temaId];
     } else if (plan.done[temaId+'-apunts']) {
-      /* if they reduce pages, unmark done */
       delete plan.done[temaId+'-apunts'];
+    }
+    savePlan();
+    renderPlan();
+    return;
+  }
+  if (e.target.id === 'fitxDoneInput'){
+    var temaId = e.target.dataset.tema;
+    var total = parseInt(e.target.dataset.total);
+    var val = Math.max(0, Math.min(parseInt(e.target.value) || 0, total));
+    e.target.value = val;
+    plan.fitxesPagsDone[temaId] = val;
+    if (val >= total){
+      plan.done[temaId+'-fitxes'] = 1;
+      delete plan.fitxesPagsDone[temaId];
+    } else if (plan.done[temaId+'-fitxes']) {
+      delete plan.done[temaId+'-fitxes'];
     }
     savePlan();
     renderPlan();
