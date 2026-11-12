@@ -357,6 +357,16 @@ details.a-card summary{cursor:pointer;font-weight:600;font-size:15px}
 .p-dow-pick button.on{background:color-mix(in srgb,var(--focus) 30%,var(--surface));color:var(--focus);font-weight:600}
 .p-legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:10px}
 .p-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.p-report{border-radius:12px;padding:14px;font-size:13px;line-height:1.5;margin-bottom:12px;position:relative}
+.p-report b{display:block;font-size:14px;margin-bottom:4px}
+.p-report .pr-body{white-space:pre-line;margin-bottom:6px}
+.p-report .pr-date{font-size:11px;color:var(--muted)}
+.p-report .pr-dismiss{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:2px 6px;border-radius:6px}
+.p-report .pr-dismiss:hover{background:rgba(255,255,255,.1)}
+.p-report.danger{background:color-mix(in srgb,var(--danger) 12%,var(--surface));border-left:3px solid var(--danger)}
+.p-report.warn{background:color-mix(in srgb,var(--extra) 12%,var(--surface));border-left:3px solid var(--extra)}
+.p-report.ok{background:color-mix(in srgb,var(--break) 12%,var(--surface));border-left:3px solid var(--break)}
+.p-report.info{background:color-mix(in srgb,var(--focus) 12%,var(--surface));border-left:3px solid var(--focus)}
 .p-alert{border-radius:10px;padding:10px 14px;font-size:13px;line-height:1.45;margin-bottom:10px}
 .p-alert.warn{background:color-mix(in srgb,var(--extra) 15%,var(--bg));border-left:3px solid var(--extra)}
 .p-alert.danger{background:color-mix(in srgb,var(--danger) 15%,var(--bg));border-left:3px solid var(--danger)}
@@ -588,6 +598,7 @@ details.a-card summary{cursor:pointer;font-weight:600;font-size:15px}
   </div>
 
   <div class="p-kpis" id="planKpis"></div>
+  <div id="planReports"></div>
   <div id="planAlerts"></div>
 
   <div class="p-card" id="planToday"></div>
@@ -2364,7 +2375,120 @@ function planForecast(nDays){
   return fc;
 }
 
+/* ===== Reestructuració automàtica ===== */
+function planAnalyze(){
+  if (!plan.reports) plan.reports = [];
+  var today = todayStr();
+  if (plan.lastAnalysis === today) return;
+  plan.lastAnalysis = today;
+
+  var daysLeft = planDaysLeft();
+  var studyDays = planStudyDays();
+  var target = planDailyTarget();
+  var apuntsDone = planPhaseCount('apunts');
+  var testDone = planPhaseCount('test');
+  var fitxesDone = planPhaseCount('fitxes');
+  var repasDone = planPhaseCount('repas');
+  var remaining = TEMARI.length - apuntsDone;
+  var totalPh = TEMARI.length;
+
+  /* 14-day study stats */
+  var now = new Date(); now.setHours(0,0,0,0);
+  var ago14 = new Date(now); ago14.setDate(ago14.getDate()-14);
+  var studiedMap = {}, totU = 0;
+  records.forEach(function(r){
+    var rd = new Date(r.data+'T00:00:00');
+    if (rd >= ago14 && rd <= now){ studiedMap[r.data]=1; totU += r.util; }
+  });
+  var dStudied = Object.keys(studiedMap).length;
+  var avgH = dStudied > 0 ? (totU/dStudied/3600) : 0;
+
+  /* Completion estimate: days to finish all apunts at current pace */
+  var remPags = planTotalPags() - planDonePags();
+  /* estimate pages/day from avg hours (assume ~20 pags/h via IA, 40% on apunts) */
+  var estPagsDay = avgH > 0 ? avgH * 8 : 0;
+  var estDaysApunts = estPagsDay > 0 ? Math.ceil(remPags / estPagsDay) : 999;
+
+  var report = null;
+
+  /* Priority 1: Critical time crunch */
+  if (daysLeft <= 45 && remaining > 10){
+    report = {type:'critical', css:'danger',
+      title:'⚠ Reestructuració: fase intensiva',
+      body:'Queden '+remaining+' temes d\'apunts i '+daysLeft+' dies. '
+        +'Canvi de prioritats: concentra\'t NOMÉS en apunts i tests. '
+        +'Deixa fitxes i repàs per quan acabis tots els apunts o les últimes setmanes. '
+        +'Objectiu: '+target+' pàg/dia.'};
+
+  /* Priority 2: Pace too high */
+  } else if (target > 8 && daysLeft > 45){
+    report = {type:'behind', css:'warn',
+      title:'📊 Reestructuració: ritme exigent',
+      body:'Necessites '+target+' pàg/dia, un ritme alt. Suggeriments: '
+        +'augmenta les hores d\'estudi (objectiu 3-4h/dia), '
+        +'centra\'t en apunts + tests com a prioritat, '
+        +'i valora si algun tema de poc pes es pot repassar ràpid sense apunts complets.'};
+
+  /* Priority 3: Almost done apunts, fitxes lagging */
+  } else if (remaining <= 3 && fitxesDone < totalPh - 5){
+    report = {type:'rebalance-fitxes', css:'info',
+      title:'🔄 Canvi de fase: accelerar fitxes',
+      body:'Gairebé has acabat tots els apunts ('+apuntsDone+'/'+totalPh+'). '
+        +'Ara les fitxes són prioritat ('+fitxesDone+'/'+totalPh+' fetes). '
+        +'Objectiu: tenir fitxes de tot per poder repassar les últimes setmanes.'};
+
+  /* Priority 4: Test backlog */
+  } else if (apuntsDone - testDone >= 6){
+    report = {type:'backlog-test', css:'warn',
+      title:'📋 Acumulació de tests pendents',
+      body:'Tens '+(apuntsDone-testDone)+' temes amb apunts fets però sense test. '
+        +'Suggeriment: dedica 2-3 dies a posar-te al dia amb els tests. '
+        +'Fer el test aviat ajuda a fixar el contingut i detectar llacunes.'};
+
+  /* Priority 5: Fitxes backlog */
+  } else if (apuntsDone - fitxesDone >= 8){
+    report = {type:'backlog-fitxes', css:'warn',
+      title:'📋 Acumulació de fitxes pendents',
+      body:'Tens '+(apuntsDone-fitxesDone)+' temes sense fitxes. '
+        +'Si deixes les fitxes per al final, no tindràs temps de repassar. '
+        +'Intenta compaginar 1 fitxa per cada 2 temes d\'apunts nous.'};
+
+  /* Priority 6: Low frequency */
+  } else if (dStudied <= 4 && dStudied > 0 && daysLeft < 120){
+    report = {type:'frequency', css:'warn',
+      title:'📅 Baixa freqüència d\'estudi',
+      body:'Has estudiat '+dStudied+' dies dels últims 14. '
+        +'Per mantenir el ritme necessites almenys 5-6 dies/setmana, '
+        +'encara que siguin sessions curtes d\'1-2h.'};
+
+  /* Priority 7: Ahead */
+  } else if (target <= 2 && apuntsDone >= 12){
+    report = {type:'ahead', css:'ok',
+      title:'🎯 Bon ritme — per davant del pla',
+      body:'Necessites només '+target+' pàg/dia. Estàs per davant! '
+        +'Aprofita per reforçar fitxes i repàs dels temes completats, '
+        +'o fer simulacres d\'examen complets per consolidar.'};
+  }
+
+  if (report){
+    /* no duplicar el mateix tipus en 7 dies */
+    var dominated = false;
+    for (var i = plan.reports.length-1; i >= 0; i--){
+      var r = plan.reports[i];
+      var rAge = Math.floor((now - new Date(r.date+'T00:00:00'))/86400000);
+      if (r.type === report.type && rAge < 7){ dominated = true; break; }
+    }
+    if (!dominated){
+      report.date = today;
+      report.read = false;
+      plan.reports.push(report);
+    }
+  }
+  savePlan();
+}
+
 function renderPlan(){
+  planAnalyze();
   var daysLeft = planDaysLeft();
   var totalPags = planTotalPags();
   var donePags = planDonePags();
@@ -2424,6 +2548,22 @@ function renderPlan(){
     aH += '<div class="p-alert ok">✅ Més del 80% completat — la recta final!</div>';
   }
   $('planAlerts').innerHTML = aH;
+
+  /* Reports / Informes de reestructuració */
+  var rH = '';
+  if (plan.reports && plan.reports.length){
+    for (var ri = plan.reports.length - 1; ri >= 0; ri--){
+      var rp = plan.reports[ri];
+      if (rp.read) continue;
+      rH += '<div class="p-report '+(rp.css||'info')+'" data-ri="'+ri+'">';
+      rH += '<button class="pr-dismiss" data-ridx="'+ri+'" title="Tancar">✕</button>';
+      rH += '<b>'+rp.title+'</b>';
+      rH += '<div class="pr-body">'+rp.body+'</div>';
+      rH += '<div class="pr-date">'+rp.date+'</div>';
+      rH += '</div>';
+    }
+  }
+  $('planReports').innerHTML = rH;
 
   /* Today's tasks */
   var tasks = planSuggestToday();
@@ -2549,6 +2689,17 @@ document.addEventListener('click', function(e){
     savePlan();
     renderPlan();
     return;
+  }
+});
+/* report dismiss */
+document.addEventListener('click', function(e){
+  if (e.target.classList.contains('pr-dismiss')){
+    var idx = parseInt(e.target.dataset.ridx);
+    if (plan.reports && plan.reports[idx]){
+      plan.reports[idx].read = true;
+      savePlan();
+      renderPlan();
+    }
   }
 });
 /* page progress input */
